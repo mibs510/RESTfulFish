@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Configuration files containing sensitive login credentials
+App.config
+
 # User-specific files
 *.rsuser
 *.suo
