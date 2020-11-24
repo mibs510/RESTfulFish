@@ -3,4 +3,4 @@ RESTful Fish is a backend application written in C# meant to bridge modern web a
 ## Documentation
 All documentation will be published on [gitbook.io](https://mibs510.gitbook.io/restfulfish).
 ## License
-Refer to [LICENSE.md](LICENSE.md)
+Refer to [LICENSE](LICENSE)
