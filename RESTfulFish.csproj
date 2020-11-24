@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <UserSecretsId>dotnet-RESTfulFish-EB785B10-0689-4DC4-B1FB-DED3B7456E09</UserSecretsId>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Authors>Connor McMillan</Authors>
+    <Company />
+    <Description>RESTfulFish is a backend application written in C# meant to bridge modern web applications with Fishbowl Inventory.</Description>
+    <Copyright>Connor McMillan</Copyright>
+    <PackageProjectUrl>https://mcmillan.website</PackageProjectUrl>
+    <RepositoryUrl>https://mcmillan.website</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIcon>app.png</PackageIcon>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extensions.Hosting" Version="2.1.0" />
+    <PackageReference Include="Grapevine" Version="4.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0-rc.2.20475.5" />
+    <PackageReference Include="MySql.Data" Version="8.0.22" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="SqlKata" Version="2.2.0" />
+    <PackageReference Include="SqlKata.Execution" Version="2.2.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0-rc.2.20475.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\RESTfulFish\assests\app.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="assests\app.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+</Project>
