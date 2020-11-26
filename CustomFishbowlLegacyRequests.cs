@@ -9,18 +9,13 @@ namespace RESTfulFish
             return FishbowlLegacyRequests.ExecuteQueryRq(Key, null,
                 GenerateSQLQuery.CustomerListRq());
         }
-        public static string GetLocationGroupIDRq(String Key)
-        {
-            return FishbowlLegacyRequests.ExecuteQueryRq(Key, null,
-                GenerateSQLQuery.GetLocationGroupIDRq());
-        }
 
         public static string GetSOItemTypeRq(String Key)
         {
             return FishbowlLegacyRequests.ExecuteQueryRq(Key, null,
                 GenerateSQLQuery.GetSOItemTypeRq());
         }
-
+        // Reimplemented because the existing request in FishbowlLegacyRequests class doesn't work?
         public static string GetSOListRq(String Key, String SONum, String LocationGroupID,
         String StatusID, String CustomerPO, String CustomerID,
         String BillToName, String ShipToName, String ProductNum,

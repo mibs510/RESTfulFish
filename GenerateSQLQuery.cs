@@ -1,10 +1,7 @@
 ﻿using System;
 using SqlKata;
 using SqlKata.Compilers;
-using SqlKata.Execution;
-using MySql.Data.MySqlClient;
 using System.Collections.Generic;
-// TODO: Should we be using something like SqlKata?
 
 namespace RESTfulFish
 {
@@ -12,10 +9,9 @@ namespace RESTfulFish
     {
         public static String CustomerListRq()
         {
-            using (var query = new QueryFactory())
-            {
-                return query.Query("customer").ToString();
-            }
+            var compiler = new MySqlCompiler();
+            var query = new Query("customer");
+            return compiler.Compile(query).ToString().Replace("\n", "");
         }
 
         /* Description: Returns a list of location group(s) and their IDs
@@ -50,12 +46,11 @@ namespace RESTfulFish
                 </Rows>
             </ExecuteQueryRs></FbiMsgsRs></FbiXml>
          */
-        public static String GetLocationGroupIDRq()
+        public static String LocationListRq()
         {
-            using (var query = new QueryFactory())
-            {
-                return query.Query("locationgroup").ToString();
-            }
+            var compiler = new MySqlCompiler();
+            var query = new Query("locationgroup");
+            return compiler.Compile(query).ToString().Replace("\n", "");
         }
 
         /* Description: Returns a list of Sales Order types and their IDs.
@@ -100,8 +95,7 @@ namespace RESTfulFish
         {
             var compiler = new MySqlCompiler();
             var query = new Query("soitemtype");
-            SqlResult result = compiler.Compile(query);
-            return result.Sql;
+            return compiler.Compile(query).ToString().Replace("\n", "");
         }
 
         /* Description: This is an equivalent to FishbowlLegacyRequests.GetSOListRq.
@@ -234,7 +228,11 @@ namespace RESTfulFish
         */
         public static String GetSOStatusIDRq()
         {
-            return "SELECT * FROM `sostatus`";
+            var compiler = new MySqlCompiler();
+            var query = new Query("sostatus");
+            return compiler.Compile(query).ToString().Replace("\n", "");
         }
+
+
     }
 }

@@ -475,8 +475,8 @@ namespace RESTfulFish
 	                        <DateCompletedEnd>date</DateCompletedEnd>
                    </GetSOListRq>
          * TODO: Determine why Grapevine does not like this function. GetSOListRq behaves outside of [Restresource].
-         * Determine why it seems to return a statusCode of 1130 even if *almost* all parameters are passed valid
-         * data.
+         * Determine why a statusCode of 1012 gets returned even if all parameters passed contain valid
+         * data. Refer to bug #1.
          */
         public static String GetSOListRq(String Key, String SONum, String LocationGroup,
             String Status, String CustomerPO, String CustomerName,

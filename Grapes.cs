@@ -51,7 +51,6 @@ public class Grapes
     [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/")]
     public IHttpContext FishbowlRequest(IHttpContext context)
     {
-        // TODO: Point to an HTML page to display all possible requests
         var response = "";
 
         // Lets wait until KeepAlive() has received a statusCode.
@@ -65,7 +64,6 @@ public class Grapes
         // Custom Fishbowl Legacy Requests
         if (context.Request.QueryString["CustomFishbowlLegacyRequest"] != null)
         {
-            Console.WriteLine("Grapes() Inside of CustomFishbowlLegacyRequest");
             var request = context.Request.QueryString["CustomFishbowlLegacyRequest"] ?? NoRequestGiven;
 
             if (!Misc.FishbowlLegacyRequest)
@@ -77,11 +75,6 @@ public class Grapes
             if (request == "CustomerListRq")
             {
                 response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.CustomerListRq(Misc.Key));
-            }
-
-            if (request == "GetLocationGroupIDRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.GetLocationGroupIDRq(Misc.Key));
             }
 
             if (request == "GetSOItemTypeRq")
@@ -97,16 +90,16 @@ public class Grapes
             if (request == "GetSOListRq")
             {
                 var SONum = context.Request.QueryString["SONum"];
-                var LocationGroupID = context.Request.QueryString["LocationGroup"];
-                var StatusID = context.Request.QueryString["Status"];
+                var LocationGroupID = context.Request.QueryString["LocationGroupID"];
+                var StatusID = context.Request.QueryString["StatusID"];
                 var CustomerPO = context.Request.QueryString["CustomerPO"];
-                var CustomerID = context.Request.QueryString["CustomerName"];
-                var BillToName = context.Request.QueryString["BillTo"];
-                var ShipToName = context.Request.QueryString["ShipTo"];
+                var CustomerID = context.Request.QueryString["CustomerID"];
+                var BillToName = context.Request.QueryString["BillToName"];
+                var ShipToName = context.Request.QueryString["ShipToName"];
                 var ProductNum = context.Request.QueryString["ProductNum"];
                 var ProductDesc = context.Request.QueryString["ProductDesc"];
                 var Salesman = context.Request.QueryString["Salesman"];
-                var typeID = context.Request.QueryString["type"];
+                var typeID = context.Request.QueryString["typeID"];
                 var DateIssuedBegin = context.Request.QueryString["DateIssuedBegin"];
                 var DateIssuedEnd = context.Request.QueryString["DateIssuedEnd"];
                 var DateCreatedBegin = context.Request.QueryString["DateCreatedBegin"];
@@ -135,7 +128,6 @@ public class Grapes
         // Fishbowl Legacy Requests
         if (context.Request.QueryString["FishbowlLegacyRequest"] != null)
         {
-            Console.WriteLine("Grapes() Inside of FishbowlLegacyRequest");
             var request = context.Request.QueryString["FishbowlLegacyRequest"] ?? NoRequestGiven;
 
             if (!Misc.FishbowlLegacyRequest)
@@ -362,8 +354,8 @@ public class Grapes
              * A connection attempt failed because the connected party did not properly 
              * respond after a period of time, or established connection failed because 
              * connected host has failed to respond.
-             * Works outside of [RestResource] (e.g. inside Main()) but seems to awlays return a
-             * statusCode of 1012 "Unknown error: null"
+             * Works outside of [RestResource] (e.g. inside Main()) but seems to always return a
+             * statusCode of 1012 "Unknown error: null". Refer to bug #1.
              * TODO: Implement something similar with FishbowlLegacyRequests.ExecuteQueryRq()
              * or FishbowlRequests.ExecuteQueryRq()
              */
@@ -710,7 +702,6 @@ public class Grapes
         // Custom Fishbowl Requests
         if (context.Request.QueryString["CustomFishbowlRequest"] != null)
         {
-            Console.WriteLine("Grapes() Inside of CustomFishbowlRequest");
             var request = context.Request.QueryString["CustomFishbowlRequest"] ?? NoRequestGiven;
 
             if (!Misc.FishbowlRequest)
@@ -722,11 +713,6 @@ public class Grapes
             if (request == "CustomerListRq")
             {
                 response = ConnectionObject.sendCommand(CustomFishbowlRequests.CustomerListRq(Misc.Key));
-            }
-
-            if (request == "GetLocationGroupIDRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetLocationGroupIDRq(Misc.Key));
             }
 
             if (request == "GetSOItemTypeRq")
@@ -757,25 +743,29 @@ public class Grapes
                 var DateScheduledEnd = context.Request.QueryString["DateScheduledEnd"];
                 var DateCompletedBegin = context.Request.QueryString["DateCompletedBegin"];
                 var DateCompletedEnd = context.Request.QueryString["DateCompletedEnd"];
-                response = CustomFishbowlRequests.GetSOListRq(
+                response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOListRq(
                     Misc.Key, SONum, LocationGroupID, StatusID, CustomerPO, CustomerID, BillToName,
                     ShipToName, ProductNum, ProductDesc, Salesman, typeID,
                     DateIssuedBegin, DateIssuedEnd, DateCreatedBegin,
                     DateCreatedEnd, DateLasteModifiedBegin, DateLasteModifiedEnd,
                     DateScheduledBegin, DateScheduledEnd, DateCompletedBegin,
-                    DateCompletedEnd);
+                    DateCompletedEnd));
             }
 
             if (request == "GetSOStatusIDRq")
             {
                 response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOStatusIDRq(Misc.Key));
             }
+
+            if (request == "LocationListRq")
+            {
+                response = ConnectionObject.sendCommand(CustomFishbowlRequests.LocationListRq(Misc.Key));
+            }
         }
 
         // Fishbowl Requests
         if (context.Request.QueryString["FishbowlRequest"] != null)
         {
-            Console.WriteLine("Grapes() Inside of FishbowlRequest");
             var request = context.Request.QueryString["FishbowlRequest"] ?? NoRequestGiven;
 
             if (!Misc.FishbowlRequest)

@@ -5,7 +5,7 @@ namespace RESTfulFish
 {
     class FishbowlLegacy
     {
-        /* Description: Pull the session Key out of the server XML response.
+        /* Description: Pull the session Key out of the XML response.
          */
         public static String PullKey(String response)
         {
@@ -33,7 +33,7 @@ namespace RESTfulFish
             return Misc.Key;
         }
 
-        /* Pull the status code out of the server XML response.
+        /* Pull the status code out of the XML response.
          */
         public static String PullStatusCode(String response)
         {

@@ -9,10 +9,10 @@ namespace RESTfulFish
             return FishbowlRequests.ExecuteQueryRq(Key, null,
                 GenerateSQLQuery.CustomerListRq());
         }
-        public static string GetLocationGroupIDRq(String Key)
+        public static string LocationListRq(String Key)
         {
             return FishbowlRequests.ExecuteQueryRq(Key, null,
-                GenerateSQLQuery.GetLocationGroupIDRq());
+                GenerateSQLQuery.LocationListRq());
         }
 
         public static string GetSOItemTypeRq(String Key)
