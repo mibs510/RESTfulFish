@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,16 +12,15 @@ namespace RESTfulFish
             /* Still need to determine if this is a good viable option
              * CreateHostBuilder(args).Build().Run();
              */
-            Misc misc = new Misc();
 
             Misc.LogInRESTfulFish();
 
             // RESTfulFish needs to be logged into Fishbowl server indefinitely, so start a second and third thread.
             // This needs to come after logging into Fishbowl.
-            ThreadStart KeepAliveRef = new ThreadStart(misc.KeepAlive);
-            Thread KeepAliveThread = new Thread(KeepAliveRef);
-            KeepAliveThread.Start();
-            ThreadStart WatchDogtRef = new ThreadStart(misc.WatchDog);
+            // ThreadStart KeepAliveRef = new ThreadStart(Misc.KeepAlive);
+            // Thread KeepAliveThread = new Thread(KeepAliveRef);
+            // KeepAliveThread.Start();
+            ThreadStart WatchDogtRef = new ThreadStart(Misc.WatchDog);
             Thread WatchDogThread = new Thread(WatchDogtRef);
             WatchDogThread.Start();
 
@@ -28,7 +28,6 @@ namespace RESTfulFish
             ThreadStart GrapeRef = new ThreadStart(Grapes.StartGrapevineServer);
             Thread GrapeThread = new Thread(GrapeRef);
             GrapeThread.Start();
-
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

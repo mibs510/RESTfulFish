@@ -10,20 +10,9 @@ using System.Threading;
 [RestResource]
 public class Grapes
 {
-    // private String NoObjectGiven = "No valid object given!";
-    private String NoRequestGiven = "No valid request given!";
-    private String FishbowlServerDown = "Fishbowl server is down!";
-
-    // Gitbook.io URLS
-    // private String GitbookCustomFishbowlLegacyRequest = "https://mibs510.gitbook.io/restfulfish/rest-api/customfishbowllegacyrequest";
-    // private String GitbookCustomFishbowlRequest = "https://mibs510.gitbook.io/restfulfish/rest-api/customfishbowlrequest";
-    // private String GitbookFishbowlLegacyObject = "https://mibs510.gitbook.io/restfulfish/rest-api/fishbowllegacyobject";
-    // private String GitbookFishbowlLegacyRequest = "https://mibs510.gitbook.io/restfulfish/rest-api/fishbowllegacyrequest";
-    // private String GitbookFishbowlRequest = "https://mibs510.gitbook.io/restfulfish/rest-api/fishbowlrequest";
-    private String GitbookAPIHelp = "https://mibs510.gitbook.io/restfulfish/rest-api/api-help";
-    private String GitbookFishbowlRequestsAppconfig = "https://mibs510.gitbook.io/restfulfish/app.config#fishbowlrequests";
-    private String GitbookFishbowlLegacyRequestAppconfig = "https://mibs510.gitbook.io/restfulfish/app.config#fishbowllegacyrequests";
-
+    /* Description: Start grapevine HTTP(S) server
+     * 
+     */
     public static void StartGrapevineServer()
     {
         Console.WriteLine("StartGrapevineServer() started");
@@ -48,10 +37,31 @@ public class Grapes
         }
     }
 
-    [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = "/")]
+    [RestRoute(HttpMethod = HttpMethod.GET, PathInfo = @"^/\w+/$")]
     public IHttpContext FishbowlRequest(IHttpContext context)
     {
         var response = "";
+        bool RespondInJson = false;
+
+        if (context.Request.PathInfo != "/xml/")
+        {
+            if (context.Request.PathInfo == "/json/")
+            {
+                RespondInJson = true;
+            } else if (context.Request.PathInfo != "/json/")
+            {
+                response = FishbowlLegacy.GenericXMLError("Invalid path! Must be \"xml\" or \"json\".");
+                goto sendResponse;
+            }
+        }
+
+        response = FishbowlLegacy.GenericXMLError("Not a valid key!");
+
+        if (Misc.FishbowlServerDown)
+        {
+            response = FishbowlLegacy.GenericXMLError("Fishbowl server host is down!");
+            goto sendResponse;
+        }
 
         // Lets wait until KeepAlive() has received a statusCode.
         while (Misc.HoldAllFishbowlRequests)
@@ -61,80 +71,10 @@ public class Grapes
             Thread.Sleep(1);
         }
 
-        // Custom Fishbowl Legacy Requests
-        if (context.Request.QueryString["CustomFishbowlLegacyRequest"] != null)
-        {
-            var request = context.Request.QueryString["CustomFishbowlLegacyRequest"] ?? NoRequestGiven;
-
-            if (!Misc.FishbowlLegacyRequest)
-            {
-                context.Response.Redirect(GitbookFishbowlLegacyRequestAppconfig);
-                goto SendResponse;
-            }
-
-            if (request == "CustomerListRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.CustomerListRq(Misc.Key));
-            }
-
-            if (request == "GetSOItemTypeRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.GetSOItemTypeRq(Misc.Key));
-            }
-
-            /* Description: This is the SQL equivalent of the already built-in GetSOListRq
-             * (as seen from FishbowlLegacyRequests class). 
-             * Returns a detailed list of SOs (Sales Orders) based on the search parameters.
-             * TODO: Test and verify functionality. Add two missing parameters.
-             */
-            if (request == "GetSOListRq")
-            {
-                var SONum = context.Request.QueryString["SONum"];
-                var LocationGroupID = context.Request.QueryString["LocationGroupID"];
-                var StatusID = context.Request.QueryString["StatusID"];
-                var CustomerPO = context.Request.QueryString["CustomerPO"];
-                var CustomerID = context.Request.QueryString["CustomerID"];
-                var BillToName = context.Request.QueryString["BillToName"];
-                var ShipToName = context.Request.QueryString["ShipToName"];
-                var ProductNum = context.Request.QueryString["ProductNum"];
-                var ProductDesc = context.Request.QueryString["ProductDesc"];
-                var Salesman = context.Request.QueryString["Salesman"];
-                var typeID = context.Request.QueryString["typeID"];
-                var DateIssuedBegin = context.Request.QueryString["DateIssuedBegin"];
-                var DateIssuedEnd = context.Request.QueryString["DateIssuedEnd"];
-                var DateCreatedBegin = context.Request.QueryString["DateCreatedBegin"];
-                var DateCreatedEnd = context.Request.QueryString["DateCreatedEnd"];
-                var DateLasteModifiedBegin = context.Request.QueryString["DateLasteModifiedBegin"];
-                var DateLasteModifiedEnd = context.Request.QueryString["DateLasteModifiedEnd"];
-                var DateScheduledBegin = context.Request.QueryString["DateScheduledBegin"];
-                var DateScheduledEnd = context.Request.QueryString["DateScheduledEnd"];
-                var DateCompletedBegin = context.Request.QueryString["DateCompletedBegin"];
-                var DateCompletedEnd = context.Request.QueryString["DateCompletedEnd"];
-                response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.GetSOListRq(
-                    Misc.Key, SONum, LocationGroupID, StatusID, CustomerPO, CustomerID, BillToName,
-                    ShipToName, ProductNum, ProductDesc, Salesman, typeID, 
-                    DateIssuedBegin, DateIssuedEnd, DateCreatedBegin,
-                    DateCreatedEnd, DateLasteModifiedBegin, DateLasteModifiedEnd,
-                    DateScheduledBegin, DateScheduledEnd, DateCompletedBegin,
-                    DateCompletedEnd));
-            }
-
-            if (request == "GetSOStatusIDRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlLegacyRequests.GetSOStatusIDRq(Misc.Key));
-            }
-        }
-
         // Fishbowl Legacy Requests
         if (context.Request.QueryString["FishbowlLegacyRequest"] != null)
         {
-            var request = context.Request.QueryString["FishbowlLegacyRequest"] ?? NoRequestGiven;
-
-            if (!Misc.FishbowlLegacyRequest)
-            {
-                context.Response.Redirect(GitbookFishbowlLegacyRequestAppconfig);
-                goto SendResponse;
-            }
+            var request = context.Request.QueryString["FishbowlLegacyRequest"] ?? FishbowlLegacy.GenericXMLError("Key FishbowlLegacyRequest does not have a valid value!");
 
             if (request == "AddInventoryRq")
             {
@@ -216,6 +156,13 @@ public class Grapes
             if (request == "CustomerGetRq")
             {
                 var Name = context.Request.QueryString["Name"];
+
+                if (Name == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\".");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.CustomerGetRq(Misc.Key,
                     Name));
             }
@@ -238,6 +185,13 @@ public class Grapes
                 var Quantity = context.Request.QueryString["Quantity"];
                 var LocationID = context.Request.QueryString["LocationID"];
                 var Tracking = context.Request.QueryString["Tracking"];
+
+                if (PartNum == null || Quantity == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"PartNum\", \"Quantity\", or \"LocationID\".");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.CycleCountRq(Misc.Key,
                     PartNum, Quantity, LocationID, Tracking));
             }
@@ -271,6 +225,19 @@ public class Grapes
             {
                 var Name = context.Request.QueryString["Name"];
                 var Query = context.Request.QueryString["Query"];
+
+                if (Name != null && Query != null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("\"Name\" and \"Query\" element passed.");
+                    goto sendResponse;
+                }
+
+                if(Name == null && Query == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\" or \"Query\".");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ExecuteQueryRq(Misc.Key,
                     Name, Query));
             }
@@ -280,7 +247,6 @@ public class Grapes
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetAccountListRq(Misc.Key));
             }
 
-            //TODO: Send only non-null XML tags
             if (request == "GetPartListRq")
             {
                 var PartNum = context.Request.QueryString["PartNum"];
@@ -338,8 +304,9 @@ public class Grapes
 
             if (request == "GetShipmentRq")
             {
+                var ShipmentID = context.Request.QueryString["ShipmentID"];
                 var ShipmentNum = context.Request.QueryString["ShipmentNum"];
-                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetShipmentRq(Misc.Key, ShipmentNum));
+                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetShipmentRq(Misc.Key, ShipmentID, ShipmentNum));
             }
 
             if (request == "GetShipNowListRq")
@@ -349,16 +316,6 @@ public class Grapes
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetShipNowListRq(Misc.Key, LocationGroup, Name));
             }
 
-            /* Does not work inside [RestResource], throws
-             * System.IO.IOException: Unable to read data from the transport connection: 
-             * A connection attempt failed because the connected party did not properly 
-             * respond after a period of time, or established connection failed because 
-             * connected host has failed to respond.
-             * Works outside of [RestResource] (e.g. inside Main()) but seems to always return a
-             * statusCode of 1012 "Unknown error: null". Refer to bug #1.
-             * TODO: Implement something similar with FishbowlLegacyRequests.ExecuteQueryRq()
-             * or FishbowlRequests.ExecuteQueryRq()
-             */
             if (request == "GetSOListRq")
             {
                 var SONum = context.Request.QueryString["SONum"];
@@ -389,16 +346,24 @@ public class Grapes
                     ShipTo, ProductNum, ProductDesc, ProductDetails, Salesman, type, DateIssuedBegin,
                     DateIssuedEnd, DateCreatedBegin, DateCreatedEnd, DateLasteModifiedBegin,
                     DateLasteModifiedEnd, DateScheduledBegin, DateScheduledEnd, DateCompletedBegin,
-                    DateCompletedEnd)); ;
+                    DateCompletedEnd));
             }
-
-            // Works. Requires both PartNumber and LocationGroup
-            // PartNumber: part number as entered in Fishbowl
-            // LocationGroup: Demo, RMA, Site 1, Site 2, All
+            
+            /* Works. Requires both PartNumber and LocationGroup
+             * PartNumber: part number as entered in Fishbowl
+             * LocationGroup: Demo, RMA, Site 1, Site 2, All
+             */
             if (request == "GetTotalInventoryRq")
             {
                 var PartNumber = context.Request.QueryString["PartNumber"];
                 var LocationGroup = context.Request.QueryString["LocationGroup"];
+
+                if (PartNumber == null || LocationGroup == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"PartNumber\" and \"LocationGroup\"");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetTotalInventoryRq(Misc.Key,
                     PartNumber, LocationGroup));
             }
@@ -419,7 +384,15 @@ public class Grapes
 
             if (request == "ImportHeaderRq")
             {
-                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ImportHeaderRq(Misc.Key));
+                var type = context.Request.QueryString["type"];
+
+                if (type == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"type\".");
+                    goto sendResponse;
+                }
+
+                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ImportHeaderRq(Misc.Key, type));
             }
 
             // Works. Requires PartNum.
@@ -428,6 +401,13 @@ public class Grapes
                 var PartNum = context.Request.QueryString["PartNum"];
                 var LastModifiedFrom = context.Request.QueryString["LastModifiedFrom"];
                 var LastModifiedTo = context.Request.QueryString["LastModifiedTo"];
+
+                if (PartNum == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"PartNum\"");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.InvQtyRq(Misc.Key,
                     PartNum, LastModifiedFrom, LastModifiedTo));
             }
@@ -444,10 +424,17 @@ public class Grapes
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.LightPartListRq(Misc.Key));
             }
 
-            // Works. Requires Number to return meaningful data.
+            // Works. Requires 'Number' to return meaningful data.
             if (request == "LoadSORq")
             {
                 var Number = context.Request.QueryString["Number"];
+
+                if (Number == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\"");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.LoadSORq(Misc.Key, Number));
             }
             // Works
@@ -536,6 +523,13 @@ public class Grapes
             if (request == "ProductGetRq")
             {
                 var Number = context.Request.QueryString["Number"];
+
+                if (Number == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\"");
+                    goto sendResponse;
+                }
+
                 var GetImage = context.Request.QueryString["GetImage"];
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ProductGetRq(Misc.Key,
                     Number, GetImage));
@@ -671,6 +665,13 @@ public class Grapes
             if (request == "VendorGetRq")
             {
                 var Name = context.Request.QueryString["Name"];
+
+                if (Name == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\"");
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.VendorGetRq(Misc.Key, Name));
             }
 
@@ -699,140 +700,12 @@ public class Grapes
             }
         }
 
-        // Custom Fishbowl Requests
-        if (context.Request.QueryString["CustomFishbowlRequest"] != null)
-        {
-            var request = context.Request.QueryString["CustomFishbowlRequest"] ?? NoRequestGiven;
+    sendResponse:
+        if (RespondInJson)
+            context.Response.SendResponse(FishbowlLegacy.Xml2Json(response));
+        else
+            context.Response.SendResponse(response);
 
-            if (!Misc.FishbowlRequest)
-            {
-                context.Response.Redirect(GitbookFishbowlRequestsAppconfig);
-                goto SendResponse;
-            }
-
-            if (request == "CustomerListRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.CustomerListRq(Misc.Key));
-            }
-
-            if (request == "GetSOItemTypeRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOItemTypeRq(Misc.Key));
-            }
-
-            if (request == "GetSOListRq")
-            {
-                var SONum = context.Request.QueryString["SONum"];
-                var LocationGroupID = context.Request.QueryString["LocationGroupID"];
-                var StatusID = context.Request.QueryString["StatusID"];
-                var CustomerPO = context.Request.QueryString["CustomerPO"];
-                var CustomerID = context.Request.QueryString["CustomerID"];
-                var BillToName = context.Request.QueryString["BillToName"];
-                var ShipToName = context.Request.QueryString["ShipToName"];
-                var ProductNum = context.Request.QueryString["ProductNum"];
-                var ProductDesc = context.Request.QueryString["ProductDesc"];
-                var Salesman = context.Request.QueryString["Salesman"];
-                var typeID = context.Request.QueryString["typeID"];
-                var DateIssuedBegin = context.Request.QueryString["DateIssuedBegin"];
-                var DateIssuedEnd = context.Request.QueryString["DateIssuedEnd"];
-                var DateCreatedBegin = context.Request.QueryString["DateCreatedBegin"];
-                var DateCreatedEnd = context.Request.QueryString["DateCreatedEnd"];
-                var DateLasteModifiedBegin = context.Request.QueryString["DateLasteModifiedBegin"];
-                var DateLasteModifiedEnd = context.Request.QueryString["DateLasteModifiedEnd"];
-                var DateScheduledBegin = context.Request.QueryString["DateScheduledBegin"];
-                var DateScheduledEnd = context.Request.QueryString["DateScheduledEnd"];
-                var DateCompletedBegin = context.Request.QueryString["DateCompletedBegin"];
-                var DateCompletedEnd = context.Request.QueryString["DateCompletedEnd"];
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOListRq(
-                    Misc.Key, SONum, LocationGroupID, StatusID, CustomerPO, CustomerID, BillToName,
-                    ShipToName, ProductNum, ProductDesc, Salesman, typeID,
-                    DateIssuedBegin, DateIssuedEnd, DateCreatedBegin,
-                    DateCreatedEnd, DateLasteModifiedBegin, DateLasteModifiedEnd,
-                    DateScheduledBegin, DateScheduledEnd, DateCompletedBegin,
-                    DateCompletedEnd));
-            }
-
-            if (request == "GetSOStatusIDRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOStatusIDRq(Misc.Key));
-            }
-
-            if (request == "LocationListRq")
-            {
-                response = ConnectionObject.sendCommand(CustomFishbowlRequests.LocationListRq(Misc.Key));
-            }
-        }
-
-        // Fishbowl Requests
-        if (context.Request.QueryString["FishbowlRequest"] != null)
-        {
-            var request = context.Request.QueryString["FishbowlRequest"] ?? NoRequestGiven;
-
-            if (!Misc.FishbowlRequest)
-            {
-                context.Response.Redirect(GitbookFishbowlRequestsAppconfig);
-                goto SendResponse;
-            }
-
-            if (request == "ExecuteQueryRq")
-            {
-                var Name = context.Request.QueryString["Name"] ?? null;
-                var Query = context.Request.QueryString["Query"] ?? null;
-                response = ConnectionObject.sendCommand(FishbowlRequests.ExecuteQueryRq(Misc.Key, Name, Query));
-            }
-
-            if (request == "ImportRq")
-            {
-                var type = context.Request.QueryString["type"];
-                var HeaderRow = context.Request.QueryString["HeaderRow"];
-                var Row = context.Request.QueryString["Row"];
-                response = ConnectionObject.sendCommand(FishbowlRequests.ImportRq(Misc.Key, type, HeaderRow, Row));
-            }
-
-            if (request == "ImportHeaderRq")
-            {
-                var type = context.Request.QueryString["type"];
-                response = ConnectionObject.sendCommand(FishbowlRequests.ImportHeaderRq(Misc.Key, type));
-            }
-
-            if (request == "IssueSORq")
-            {
-                var SONumber = context.Request.QueryString["SONumber"];
-                response = ConnectionObject.sendCommand(FishbowlRequests.IssueSORq(Misc.Key, SONumber));
-            }
-
-            // Skipping LoginRq
-
-            // Skipping LogoutRq
-
-            /* TODO: Add the following parameters: FulfillServiceItems, ErrorIfNotFulfilled, ShipDate
-             * Refer to https://www.fishbowlinventory.com/wiki/Fishbowl_API
-             */
-
-            if (request == "QuickShipRq")
-            {
-                var SONumber = context.Request.QueryString["SONumber"];
-                response = ConnectionObject.sendCommand(FishbowlRequests.QuickShipRq(Misc.Key, SONumber));
-            }
-
-            if (request == "VoidSORq")
-            {
-                var SONumber = context.Request.QueryString["SONumber"];
-                response = ConnectionObject.sendCommand(FishbowlRequests.VoidSORq(Misc.Key, SONumber));
-            }
-        }
-
-        if (response == "")
-        {
-            context.Response.Redirect(GitbookAPIHelp);
-            goto SendResponse;
-        }
-
-        if (Misc.FishbowlServerDown)
-            response += FishbowlServerDown;
-
-        SendResponse:
-        context.Response.SendResponse(response);
         return context;
     }
 }

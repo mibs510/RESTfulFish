@@ -12,9 +12,6 @@ namespace RESTfulFish
 		public static Boolean FishbowlServerDown { get; set; } = false;
 		public static String Key { get; set; } = "";
 
-		public static Boolean FishbowlRequest { get; set; } = false;
-		public static Boolean FishbowlLegacyRequest { get; set; } = false;
-
 		public static Boolean HoldAllFishbowlRequests { get; set; } = false;
 
 		public static int KeepAliveSleep { get; set; }
@@ -30,8 +27,6 @@ namespace RESTfulFish
 		 */
 		public static void LogInRESTfulFish()
         {
-			String loginCommand = "";
-
 			// Get Fishbowl username, password, host, and port from app.config
 			Misc.ReadAllSettings();
 
@@ -40,58 +35,24 @@ namespace RESTfulFish
 			string FishbowlPassword = ConfigurationManager.AppSettings.Get("FishbowlPassword");
 
 			ConnectionObject.Connect();
+			
+			String loginCommand = FishbowlLegacyRequests.LoginRq("3565",
+				"RESTfulFish Gateway", FishbowlUser, "RESTfulFish Gateway", FishbowlPassword);
 
-			/* Lets login into Fishbowl server.
-             * We can only send FishbowlLegacyRequests if we call FishbowlLegacyRequests.LoginRq().
-             * Additionally, we can only send FishbowlRequests if we call FishbowlRequests.LoginRq().
-             * CAUTION: FishbowlRequests.LoginRq() does not log out FishbowlUser upon sending a  
-             * RST ACK packet to the Fishbowl server from ConnectionObject.Dispose() being called
-             * upon exiting! You will need to manually logout FishbowlUser under the 'Connections'
-             * tab in Fishbowl Server. This is more of an issue with Fishbowl Server as this does not
-             * occur with FishbowlLegacyRequests.LoginRq().
-             * TODO: Find a solution to address FishbowlRequests.LoginRq() issue.
-             */
-
-			if (Misc.FishbowlRequest)
-            {
-				loginCommand = FishbowlRequests.LoginRq("3565",
-					"RESTfulFish Gateway", FishbowlUser, "RESTfulFish Gateway", FishbowlPassword);
-			} else if (Misc.FishbowlLegacyRequest)
-            {
-				loginCommand = FishbowlLegacyRequests.LoginRq("3565",
-					"RESTfulFish Gateway", FishbowlUser, "RESTfulFish Gateway", FishbowlPassword);
-			}
 
 			/* Send login command once to get fishbowl server to recognize the connection attempt
              * or pull the key off the line if already connected.
-             * TODO: Misc.PullKey will need to be reimplemented into 
-             * FishbowlLegacyRequests and FishbowlRequests classes.
              */
-			Console.Write("LogInRESTfulFish(): Client Started... \n");
-
-			if (Misc.FishbowlRequest)
-			{
-				Misc.Key = Fishbowl.PullKey(ConnectionObject.sendCommand(loginCommand));
-			}
-			else if (Misc.FishbowlLegacyRequest)
-			{
-				Misc.Key = FishbowlLegacy.PullKey(ConnectionObject.sendCommand(loginCommand));
-			}
-
+			Console.WriteLine("Misc.LogInRESTfulFish(): Client Started...");
+			
+			Key = FishbowlLegacy.PullKey(ConnectionObject.sendCommand(loginCommand));
 			
 			while (Misc.Key == "null")
 			{
 				Console.WriteLine("Please accept the connection attempt on the fisbowl server and press Enter.");
 				Console.WriteLine("Refer to 'Integrated Apps tab' in https://www.fishbowlinventory.com/wiki/Settings");
 				Console.ReadLine();
-				if (Misc.FishbowlRequest)
-				{
-					Misc.Key = Fishbowl.PullKey(ConnectionObject.sendCommand(loginCommand));
-				}
-				else if (Misc.FishbowlLegacyRequest)
-				{
-					Misc.Key = FishbowlLegacy.PullKey(ConnectionObject.sendCommand(loginCommand));
-				}
+				Misc.Key = FishbowlLegacy.PullKey(ConnectionObject.sendCommand(loginCommand));
 			}
 		}
 
@@ -122,20 +83,10 @@ namespace RESTfulFish
 			// Check for conflicts
 			try
             {
-				Boolean FishbowlRq = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("FishbowlRequests"));
-				Boolean FishbowlLegacyRq = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("FishbowlLegacyRequests"));
 				Boolean EnableHTTPS = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("EnableHttps"));
 				int FishbowlPort = Int32.Parse(ConfigurationManager.AppSettings.Get("FishbowlPort"));
 				int HttpPort = Int32.Parse(ConfigurationManager.AppSettings.Get("HttpPort"));
 				int KeepAlive = Int32.Parse(ConfigurationManager.AppSettings.Get("KeepAliveSleep"));
-
-				if (FishbowlRq && FishbowlLegacyRq || !FishbowlRq && !FishbowlLegacyRq)
-				{
-					Console.WriteLine("ReadAllSettings(): Invalid App.config values!");
-					Console.WriteLine("ReadAllSettings(): FishbowlRequests and FishbowlLegacyRequests cannot be true or false simultaneously!");
-					Console.ReadLine();
-					System.Environment.Exit(1);
-				}
 
 				if (FishbowlPort < 1 || FishbowlPort > 65535)
 				{
@@ -161,14 +112,13 @@ namespace RESTfulFish
 
 				if (KeepAlive <= 0)
 				{
-					Console.WriteLine("ReadAllSettings(): {0} minutes is not a valid wait period for KeepAliveSleep!", KeepAliveSleep);
+					Console.WriteLine("ReadAllSettings(): {0} minutes is not a valid wait period for KeepAliveSleep!",
+						KeepAliveSleep);
 					Console.ReadLine();
 					System.Environment.Exit(1);
 				}
 
 				// Let these be globally accessible
-				FishbowlRequest = FishbowlRq;
-				FishbowlLegacyRequest = FishbowlLegacyRq;
 				KeepAliveSleep = KeepAlive * 60000;
 				UseHTTPS = EnableHTTPS;
 			}
@@ -187,7 +137,7 @@ namespace RESTfulFish
          * automatically reconnect when it's back online.
          * TODO: Verify that this works.
          */
-		public void WatchDog()
+		public static void WatchDog()
         {
             Console.WriteLine("WatchDog() started");
 
@@ -248,7 +198,7 @@ namespace RESTfulFish
 		 * We will assume the inactivity time to be 10 minutes, 
 		 * so we will request data every 5 minutes.
 		 */
-		public void KeepAlive()
+		public static void KeepAlive()
 		{
 			String statusCode = "";
 
@@ -256,27 +206,18 @@ namespace RESTfulFish
 
 			while (!Misc.FishbowlServerDown)
 			{
-				// Wait five minutes
+				// Wait KeepAliveSleep (from App.config) minutes.
 				Thread.Sleep(Misc.KeepAliveSleep);
-				/* TODO: Implement a stop for all other request received through the REST server
-				 * until we send ours and capture a response.
-				 * It's been observed that the response from FishbowlLegacyRequests.CustomerNameListRq()
-				 * has been given to the requestor on the REST interface when requesting some other request
-				 * (e.g. FishbowlLegacyRequests.GetSOListRq()).
-				 */
 				Console.WriteLine("KeepAlive(): Sending...");
 				// Stop all requests via the REST HTTP interface until we are done getting a response back.
 				HoldAllFishbowlRequests = true;
+				// Wait one second before proceeding.
 				Thread.Sleep(1000);
-				if (Misc.FishbowlRequest)
-				{
-					statusCode = Fishbowl.PullStatusCode(ConnectionObject.sendCommand(CustomFishbowlRequests.GetSOStatusIDRq(Misc.Key)));
-				}
-				else if (Misc.FishbowlLegacyRequest)
-				{
-					statusCode = FishbowlLegacy.PullStatusCode(ConnectionObject.sendCommand(FishbowlLegacyRequests.CustomerNameListRq(Misc.Key)));
-				}
+				statusCode = FishbowlLegacy.PullStatusCode(
+					ConnectionObject.sendCommand(FishbowlLegacyRequests.CustomerNameListRq(Misc.Key)));
+				// Wait one second before allowing all other requests to be processed.
 				Thread.Sleep(1000);
+				// Lift the hold.
 				HoldAllFishbowlRequests = false;
 
 				// Make sure Fishbowl is responding with a statusCode of 1000.

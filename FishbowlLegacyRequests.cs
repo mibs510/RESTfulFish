@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml;
 using System.Security.Cryptography;
-
+using System.IO;
 
 namespace RESTfulFish
 {
@@ -28,17 +28,26 @@ namespace RESTfulFish
             String UOMID, String Cost, String Note, String TrackingObj, 
             String LocationTagNum, String TagNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key>" +
-                "</Ticket><FbiMsgsRq><AddInventoryRq>" +
-                "<PartNum>" + PartNum + "</PartNum>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<UOMID>" + UOMID + "</UOMID>" +
-                "<Cost>" + Cost + "</Cost>" +
-                "<Note>" + Note + "</Note>" +
-                "<Tracking>" + TrackingObj + "</Tracking>" +
-                "<LocationTagNum>" + LocationTagNum + "</LocationTagNum>" +
-                "<TagNum>" + TagNum + "</TagNum>" +
-                "</AddInventoryRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "AddInventoryRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (UOMID != null)
+                xml.Item1.WriteElementString("UOMID", UOMID);
+            if (Cost != null)
+                xml.Item1.WriteElementString("Cost", Cost);
+            if (Note != null)
+                xml.Item1.WriteElementString("Note", Note);
+            if (TrackingObj != null)
+                xml.Item1.WriteElementString("Tracking", TrackingObj);
+            if (LocationTagNum != null)
+                xml.Item1.WriteElementString("LocationTagNum", LocationTagNum);
+            if (PartNum != null)
+                xml.Item1.WriteElementString("TagNum", TagNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Adds a memo to the specified object.
@@ -56,15 +65,24 @@ namespace RESTfulFish
             String ProductNum, String OrderNum, String CustomerNum, 
             String VendorNum, String MemoObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><AddMemoRq><ItemType>" + ItemType + "</ItemType>" +
-                "<PartNum>" + PartNum + "</PartNum>" +
-                "<ProductNum>" + ProductNum + "</ProductNum>" +
-                "<OrderNum>" + OrderNum + "</OrderNum>" +
-                "<CustomerNum>" + CustomerNum + "</CustomerNum>" +
-                "<VendorNum>" + VendorNum + "</VendorNum>" +
-                "<Memo>" + MemoObj + "</Memo>" +
-                "</AddMemoRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "AddMemoRq");
+
+            if (ItemType != null)
+                xml.Item1.WriteElementString("ItemType", ItemType);
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (ProductNum != null)
+                xml.Item1.WriteElementString("ProductNum", ProductNum);
+            if (OrderNum != null)
+                xml.Item1.WriteElementString("OrderNum", OrderNum);
+            if (CustomerNum != null)
+                xml.Item1.WriteElementString("CustomerNum", CustomerNum);
+            if (VendorNum != null)
+                xml.Item1.WriteElementString("VendorNum", VendorNum);
+            if (MemoObj != null)
+                xml.Item1.WriteElementString("Memo", MemoObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Adds an item to a Sales Order.
@@ -75,10 +93,14 @@ namespace RESTfulFish
         */
         public static String AddSOItemRq(String Key, String OrderNum, String SalesOrderItemObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><AddSOItemRq><OrderNum>" + OrderNum + "</OrderNum>" +
-                "<SalesOrderItem>" + SalesOrderItemObj + "</SalesOrderItem>" +
-                "</AddSOItemRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "AddSOItemRq");
+
+            if (OrderNum != null)
+                xml.Item1.WriteElementString("OrderNum", OrderNum);
+            if (SalesOrderItemObj != null)
+                xml.Item1.WriteElementString("SalesOrderItem", SalesOrderItemObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Add an item to an existing open WO.
@@ -96,15 +118,24 @@ namespace RESTfulFish
             String Description, String PartNum, String Quantity, String UOMCode, 
             String Cost)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><AddWorkOrderItemRq><OrderNum>" + OrderNum + "</OrderNum>" +
-                "<TypeId>" + TypeId + "</TypeId>" +
-                "<Description>" + Description + "</Description>" +
-                "<PartNum>" + PartNum + "</PartNum>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<UOMCode>" + UOMCode + "</UOMCode>" +
-                "<Cost>" + Cost + "</Cost>" +
-                "</AddWorkOrderItemRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "AddWorkOrderItemRq");
+
+            if (OrderNum != null)
+                xml.Item1.WriteElementString("OrderNum", OrderNum);
+            if (TypeId != null)
+                xml.Item1.WriteElementString("TypeId", TypeId);
+            if (Description != null)
+                xml.Item1.WriteElementString("Description", Description);
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (UOMCode != null)
+                xml.Item1.WriteElementString("UOMCode", UOMCode);
+            if (Cost != null)
+                xml.Item1.WriteElementString("Cost", Cost);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
 
@@ -118,11 +149,16 @@ namespace RESTfulFish
         public static String BuildBomRq(String Key, String BomNumber, String Quantity, 
             String DateScheduled)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><BuildBomRq><BomNumber>" + BomNumber + "</BomNumber>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<DateScheduled>" + DateScheduled + "</DateScheduled>" +
-                "</BuildBomRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "BuildBomRq");
+
+            if (BomNumber != null)
+                xml.Item1.WriteElementString("BomNumber", BomNumber);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (DateScheduled != null)
+                xml.Item1.WriteElementString("DateScheduled", DateScheduled);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This generates a shipping order that is completely fictitious.
@@ -134,9 +170,12 @@ namespace RESTfulFish
         */
         public static String CalculateSORq(String Key, String SalesOrderObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CalculateSORq><SalesOrder>" + SalesOrderObj + "</SalesOrder>" +
-                "</CalculateSORq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CalculateSORq");
+
+            if (SalesOrderObj != null)
+                xml.Item1.WriteElementString("SalesOrder", SalesOrderObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns the names of every Carrier in your database.
@@ -144,8 +183,9 @@ namespace RESTfulFish
          */
         public static String CarrierListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CarrierListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CarrierListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request is used to close short a sales order
@@ -153,9 +193,12 @@ namespace RESTfulFish
          */
         public static String CloseShortSORq(String Key, String SONumber)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CloseShortSORq><SONumber>" + SONumber + "</SONumber>" +
-                "</CloseShortSORq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CloseShortSORq");
+
+            if (SONumber != null)
+                xml.Item1.WriteString(SONumber);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This returns a Customer object from your database 
@@ -167,8 +210,12 @@ namespace RESTfulFish
         */
         public static String CustomerGetRq(String Key, String Name)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket><FbiMsgsRq>" +
-                "<CustomerGetRq><Name>" + Name + "</Name></CustomerGetRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CustomerGetRq");
+
+            if (Name != null)
+                xml.Item1.WriteElementString("Name", Name);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a list of every Customer in your database with their details.
@@ -176,8 +223,9 @@ namespace RESTfulFish
          */
         public static String CustomerListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CustomerListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CustomerListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a list of the names of all the customers in your database.
@@ -185,8 +233,9 @@ namespace RESTfulFish
          */
         public static String CustomerNameListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CustomerNameListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CustomerNameListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Used to correct inventory amounts. Including Tracking information in optional.
@@ -200,12 +249,18 @@ namespace RESTfulFish
         public static String CycleCountRq(String Key, String PartNum, String Quantity, 
             String LocationID, String Tracking)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><CycleCountRq><PartNum>" + PartNum + "</PartNum>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<LocationID>" + LocationID + "</LocationID>" +
-                "<Tracking>" + Tracking + "</Tracking>" +
-                "</CycleCountRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "CycleCountRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (LocationID != null)
+                xml.Item1.WriteElementString("LocationID", LocationID);
+            if (Tracking != null)
+                xml.Item1.WriteElementString("Tracking", Tracking);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Emails a report to a given email address (Date ranges cannot be specified)
@@ -224,15 +279,25 @@ namespace RESTfulFish
         public static String EmailReportRq(String Key, String ReportName, String ReportTree, 
             String Email, String Name, String Value)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><EmailReportRq><ReportName>" + ReportName + "</ReportName>" +
-                "<ReportTree>" + ReportTree + "</ReportTree>" +
-                "<Email>" + Email + "</Email>" +
-                "<ParameterList><ReportParam>" +
-                "<Name>" + Name + "</Name>" +
-                "<Value>" + Value + "</Value>" +
-                "</ReportParam></ParameterList>" +
-                "</EmailReportRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "EmailReportRq");
+
+            if (ReportName != null)
+                xml.Item1.WriteElementString("ReportName", ReportName);
+            if (ReportTree != null)
+                xml.Item1.WriteElementString("ReportTree", ReportTree);
+            if (Email != null)
+                xml.Item1.WriteElementString("Email", Email);
+            if (Name != null && Value != null)
+            {
+                xml.Item1.WriteStartElement("ParameterList");
+                xml.Item1.WriteStartElement("ReportParam");
+                xml.Item1.WriteElementString("Name", Name);
+                xml.Item1.WriteElementString("Value", Value);
+                xml.Item1.WriteEndElement();
+                xml.Item1.WriteEndElement();
+            }
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns all available export options
@@ -240,8 +305,9 @@ namespace RESTfulFish
          */
         public static String ExportListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ExportListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ExportListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns export data of specified export type
@@ -251,8 +317,12 @@ namespace RESTfulFish
         */
         public static String ExportRq(String Key, String Type)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ExportRq><Type>" + Type + "</Type></ExportRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ExportRq");
+
+            if (Type != null)
+                xml.Item1.WriteElementString("Type", Type);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns results of sql query in csv format. 
@@ -267,27 +337,14 @@ namespace RESTfulFish
         */
         public static String ExecuteQueryRq(String Key, String Name, String Query)
         {
-            System.Text.StringBuilder buffer = new System.Text.StringBuilder("<FbiXml><Ticket><Key>");
-            buffer.Append(Key);
-            buffer.Append("</Key></Ticket><FbiMsgsRq><ExecuteQueryRq>");
-            
-            if (Name != null )
-            {
-                buffer.Append("<Name>");
-                buffer.Append(Name);
-                buffer.Append("</Name>");
-            }
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ExecuteQueryRq");
 
+            if (Name != null)
+                xml.Item1.WriteElementString("Name", Name);
             if (Query != null)
-            {
-                buffer.Append("<Query>");
-                buffer.Append(Query);
-                buffer.Append("</Query>");
-            }
+                xml.Item1.WriteElementString("Query", Query);
 
-            buffer.Append("</ExecuteQueryRq></FbiMsgsRq></FbiXml>");
-
-            return buffer.ToString();
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a list of all QuickBooks accounts complete with IDs, types, and balances.
@@ -295,8 +352,9 @@ namespace RESTfulFish
          */
         public static String GetAccountListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetAccountListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetAccountListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request will return the information on a specified pick.
@@ -318,7 +376,6 @@ namespace RESTfulFish
 	                        <Configurable>boolean</Configurable>
                    </GetPartListRq>
          * TODO: Determine which parameters are required for basic minimum functionality.
-         * Build a buffer to omit opening and closing tags with null parameters.
          */
         public static String GetPartListRq(String Key, String PartNum, String PartDesc, 
             String PartDetails, String PartUPC, String PartType, String ABCCode, 
@@ -326,29 +383,40 @@ namespace RESTfulFish
             String ProductDesc, String ActiveFlag, String ShowActive, 
             String ShowInactive, String HasBOM, String Configurable)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetPartListRq><PartNum>" + PartNum + "</PartNum>" +
-                "<PartDesc>" + PartDesc + "</PartDesc>" +
-                "<PartDetails>" + PartDetails + "</PartDetails>" +
-                "<PartUPC>" + PartUPC + "</PartUPC>" +
-                "<PartType>" + PartType + "</PartType>" +
-                "<ABCCode>" + ABCCode + "</ABCCode>" +
-                "<VendorName>" + VendorName + "</VendorName>" +
-                "<VendorNum>" + VendorNum + "</VendorNum>" +
-                "<ProductNum>" + ProductNum + "</ProductNum>" +
-                "<ProductDesc>" + ProductDesc + "</ProductDesc>" +
-                "<ActiveFlag>" + ActiveFlag + "</ActiveFlag>" +
-                "<ShowActive>" + ShowActive + "</ShowActive>" +
-                "<ShowInactive>" + ShowInactive + "</ShowInactive>" +
-                "<HasBOM>" + HasBOM + "</HasBOM>" +
-                "<Configurable>" + Configurable + "</Configurable>" +
-                "</GetPartListRq></FbiMsgsRq></FbiXml>";
-        }
-        public static String GetPartListRq(String Key, String PartNum)
-        {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetPartListRq><PartNum>" + PartNum + "</PartNum>" +
-                "</GetPartListRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetPartListRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (PartDesc != null)
+                xml.Item1.WriteElementString("PartDesc", PartDesc);
+            if (PartDetails != null)
+                xml.Item1.WriteElementString("PartDetails", PartDetails);
+            if (PartUPC != null)
+                xml.Item1.WriteElementString("PartUPC", PartUPC);
+            if (PartType != null)
+                xml.Item1.WriteElementString("PartType", PartType);
+            if (ABCCode != null)
+                xml.Item1.WriteElementString("ABCCode", ABCCode);
+            if (VendorName != null)
+                xml.Item1.WriteElementString("VendorName", VendorName);
+            if (VendorNum != null)
+                xml.Item1.WriteElementString("VendorNum", VendorNum);
+            if (ProductNum != null)
+                xml.Item1.WriteElementString("ProductNum", ProductNum);
+            if (ProductDesc != null)
+                xml.Item1.WriteElementString("ProductDesc", ProductDesc);
+            if (ActiveFlag != null)
+                xml.Item1.WriteElementString("ActiveFlag", ActiveFlag);
+            if (ShowActive != null)
+                xml.Item1.WriteElementString("ShowActive", ShowActive);
+            if (ShowInactive != null)
+                xml.Item1.WriteElementString("ShowInactive", ShowInactive);
+            if (HasBOM != null)
+                xml.Item1.WriteElementString("HasBOM", HasBOM);
+            if (Configurable != null)
+                xml.Item1.WriteElementString("Configurable", Configurable);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request will return the information on a specified pick.
@@ -358,9 +426,12 @@ namespace RESTfulFish
         */
         public static String GetPickRq(String Key, String PickNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetPickRq><PickNum>" + PickNum + "</PickNum>" +
-                "</GetPickRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetPickRq");
+
+            if (PickNum != null)
+                xml.Item1.WriteElementString("PickNum", PickNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns all purchase order queued in the specified location.
@@ -370,9 +441,12 @@ namespace RESTfulFish
         */
         public static String GetPOListRq(String Key, String LocationGroup)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetPOListRq><LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "</GetPOListRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetPOListRq");
+
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns receipt information.
@@ -385,11 +459,16 @@ namespace RESTfulFish
         public static String GetReceiptRq(String Key, String OrderNumber, String OrderType, 
             String LocationGroup)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetReceiptRq><OrderNumber>" + OrderNumber + "</OrderNumber>" +
-                "<OrderType>" + OrderType + "</OrderType>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "</GetReceiptRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetReceiptRq");
+
+            if (OrderNumber != null)
+                xml.Item1.WriteElementString("OrderNumber", OrderNumber);
+            if (OrderType != null)
+                xml.Item1.WriteElementString("OrderType", OrderType);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Request a list of Shipments. 
@@ -411,26 +490,40 @@ namespace RESTfulFish
             String RecordCount, String OrderTypeID, String StatusID, 
             String LocationGroup, String Carrier)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetShipListRq><StartRecord>" + StartRecord + "</StartRecord>" +
-                "<RecordCount>" + RecordCount + "</RecordCount>" +
-                "<OrderTypeID>" + OrderTypeID + "</OrderTypeID>" +
-                "<StatusID>" + StatusID + "</StatusID>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "<Carrier>" + Carrier + "</Carrier>" +
-                "</GetShipListRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetShipListRq");
+
+            if (StartRecord != null)
+                xml.Item1.WriteElementString("StartRecord", StartRecord);
+            if (RecordCount != null)
+                xml.Item1.WriteElementString("RecordCount", RecordCount);
+            if (OrderTypeID != null)
+                xml.Item1.WriteElementString("OrderTypeID", OrderTypeID);
+            if (StatusID != null)
+                xml.Item1.WriteElementString("StatusID", StatusID);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+            if (Carrier != null)
+                xml.Item1.WriteElementString("Carrier", Carrier);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns the shipment details about a specified shipment.
          * Syntax: <GetShipmentRq>
 	                        <ShipmentID>int</ShipmentID>
-	                        <ShipmentN
+	                        <ShipmentNum>string</ShipmentNum>
+                   </GetShipmentRq>
         */
-        public static String GetShipmentRq(String Key, String ShipmentNum)
+        public static String GetShipmentRq(String Key, String ShipmentID, String ShipmentNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetShipmentRq><ShipmentNum>" + ShipmentNum + "</ShipmentNum>" +
-                "</GetShipmentRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetShipmentRq");
+
+            if (ShipmentID != null)
+                xml.Item1.WriteElementString("ShipmentNum", ShipmentID);
+            if (ShipmentNum != null)
+                xml.Item1.WriteElementString("ShipmentNum", ShipmentNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a list of orders that are packed and ready to ship.
@@ -443,9 +536,18 @@ namespace RESTfulFish
         */
         public static String GetShipNowListRq(String Key, String LocationGroup, String Name)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetShipNowListRq><LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                    "<Carrier><Name>" + Name + "</Name></Carrier></GetShipNowListRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetShipNowListRq");
+
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+            if (Name != null)
+            {
+                xml.Item1.WriteStartElement("Carrier");
+                xml.Item1.WriteElementString("Name", Name);
+                xml.Item1.WriteEndElement();
+            }
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a detailed list of SOs (Sales Orders) based on the search parameters.
@@ -474,9 +576,6 @@ namespace RESTfulFish
                 	        <DateCompletedBegin>date</DateCompletedBegin>
 	                        <DateCompletedEnd>date</DateCompletedEnd>
                    </GetSOListRq>
-         * TODO: Determine why Grapevine does not like this function. GetSOListRq behaves outside of [Restresource].
-         * Determine why a statusCode of 1012 gets returned even if all parameters passed contain valid
-         * data. Refer to bug #1.
          */
         public static String GetSOListRq(String Key, String SONum, String LocationGroup,
             String Status, String CustomerPO, String CustomerName,
@@ -487,150 +586,56 @@ namespace RESTfulFish
             String DateLasteModifiedEnd, String DateScheduledBegin,
             String DateScheduledEnd, String DateCompletedBegin, String DateCompletedEnd)
         {
-            System.Text.StringBuilder buffer = new System.Text.StringBuilder("<FbiXml><Ticket><Key>");
-            buffer.Append(Key);
-            buffer.Append("</Key></Ticket><FbiMsgsRq><GetSOListRq>");
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetSOListRq");
+
             if (SONum != null)
-            {
-                buffer.Append("<SONum>");
-                buffer.Append(SONum);
-                buffer.Append("</SONum>");
-            }
+                xml.Item1.WriteElementString("SONum", SONum);
             if (LocationGroup != null)
-            {
-                buffer.Append("<LocationGroup>");
-                buffer.Append(LocationGroup);
-                buffer.Append("</LocationGroup>");
-            }
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
             if (Status != null)
-            {
-                buffer.Append("<Status>");
-                buffer.Append(Status);
-                buffer.Append("</Status>");
-            }
+                xml.Item1.WriteElementString("Status", Status);
             if (CustomerPO != null)
-            {
-                buffer.Append("<CustomerPO>");
-                buffer.Append(CustomerPO);
-                buffer.Append("</CustomerPO>");
-            }
+                xml.Item1.WriteElementString("CustomerPO", CustomerPO);
             if (CustomerName != null)
-            {
-                buffer.Append("<CustomerName>");
-                buffer.Append(CustomerName);
-                buffer.Append("</CustomerName>");
-            }
+                xml.Item1.WriteElementString("CustomerName", CustomerName);
             if (AccountNumber != null)
-            {
-                buffer.Append("<AccountNumber>");
-                buffer.Append(AccountNumber);
-                buffer.Append("</AccountNumber>");
-            }
+                xml.Item1.WriteElementString("AccountNumber", AccountNumber);
             if (BillTo != null)
-            {
-                buffer.Append("<BillTo>");
-                buffer.Append(BillTo);
-                buffer.Append("</BillTo>");
-            }
+                xml.Item1.WriteElementString("BillTo", BillTo);
             if (ShipTo != null)
-            {
-                buffer.Append("<ShipTo>");
-                buffer.Append(ShipTo);
-                buffer.Append("</ShipTo>");
-            }
+                xml.Item1.WriteElementString("ShipTo", ShipTo);
             if (ProductNum != null)
-            {
-                buffer.Append("<ProductNum>");
-                buffer.Append(ProductNum);
-                buffer.Append("</ProductNum>");
-            }                
+                xml.Item1.WriteElementString("ProductNum", ProductNum);
             if (ProductDesc != null)
-            {
-                buffer.Append("<ProductDesc>");
-                buffer.Append(ProductDesc);
-                buffer.Append("</ProductDesc>");
-            }    
+                xml.Item1.WriteElementString("ProductDesc", ProductDesc);
             if (ProductDetails != null)
-            {
-                buffer.Append("<ProductDetails>");
-                buffer.Append(ProductDetails);
-                buffer.Append("</ProductDetails>");
-            }
+                xml.Item1.WriteElementString("ProductDetails", ProductDetails);
             if (Salesman != null)
-            {
-                buffer.Append("<Salesman>");
-                buffer.Append(Salesman);
-                buffer.Append("</Salesman>");
-            }
+                xml.Item1.WriteElementString("Salesman", Salesman);
             if (type != null)
-            {
-                buffer.Append("<Type>");
-                buffer.Append(type);
-                buffer.Append("</Type>");
-            }
+                xml.Item1.WriteElementString("type", type);
             if (DateIssuedBegin != null)
-            {
-                buffer.Append("<DateIssuedBegin>");
-                buffer.Append(DateIssuedBegin);
-                buffer.Append("</DateIssuedBegin>");
-            }
+                xml.Item1.WriteElementString("DateIssuedBegin", DateIssuedBegin);
             if (DateIssuedEnd != null)
-            {
-                buffer.Append("<DateIssuedEnd>");
-                buffer.Append(DateIssuedEnd);
-                buffer.Append("</DateIssuedEnd>");
-            }
+                xml.Item1.WriteElementString("DateIssuedEnd", DateIssuedEnd);
             if (DateCreatedBegin != null)
-            {
-                buffer.Append("<DateCreatedBegin>");
-                buffer.Append(DateCreatedBegin);
-                buffer.Append("</DateCreatedBegin>");
-            }
+                xml.Item1.WriteElementString("DateCreatedBegin", DateCreatedBegin);
             if (DateCreatedEnd != null)
-            {
-                buffer.Append("<DateCreatedEnd>");
-                buffer.Append(DateCreatedEnd);
-                buffer.Append("</DateCreatedEnd>");
-            }
+                xml.Item1.WriteElementString("DateCreatedEnd", DateCreatedEnd);
             if (DateLasteModifiedBegin != null)
-            {
-                buffer.Append("<DateLasteModifiedBegin>");
-                buffer.Append(DateLasteModifiedBegin);
-                buffer.Append("</DateLasteModifiedBegin>");
-            }
+                xml.Item1.WriteElementString("DateLasteModifiedBegin", DateLasteModifiedBegin);
             if (DateLasteModifiedEnd != null)
-            {
-                buffer.Append("<DateLasteModifiedEnd>");
-                buffer.Append(DateLasteModifiedEnd);
-                buffer.Append("</DateLasteModifiedEnd>");
-            }
+                xml.Item1.WriteElementString("DateLasteModifiedEnd", DateLasteModifiedEnd);
             if (DateScheduledBegin != null)
-            {
-                buffer.Append("<DateScheduledBegin>");
-                buffer.Append(DateScheduledBegin);
-                buffer.Append("</DateScheduledBegin>");
-            }
+                xml.Item1.WriteElementString("DateScheduledBegin", DateScheduledBegin);
             if (DateScheduledEnd != null)
-            {
-                buffer.Append("<DateScheduledEnd>");
-                buffer.Append(DateScheduledEnd);
-                buffer.Append("</DateScheduledEnd>");
-            }
+                xml.Item1.WriteElementString("DateScheduledEnd", DateScheduledEnd);
             if (DateCompletedBegin != null)
-            {
-                buffer.Append("<DateCompletedBegin>");
-                buffer.Append(DateCompletedBegin);
-                buffer.Append("</DateCompletedBegin>");
-            }
+                xml.Item1.WriteElementString("DateCompletedBegin", DateCompletedBegin);
             if (DateCompletedEnd != null)
-            {
-                buffer.Append("<DateCompletedEnd>");
-                buffer.Append(DateCompletedEnd);
-                buffer.Append("</DateCompletedEnd>");
-            }
-                
-            buffer.Append("</GetSOListRq></FbiMsgsRq></FbiXml>");
-            return buffer.ToString();
+                xml.Item1.WriteElementString("DateCompletedEnd", DateCompletedEnd);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns the total number of the inquired item at a specific location.
@@ -641,11 +646,14 @@ namespace RESTfulFish
         */
         public static String GetTotalInventoryRq(String Key, String PartNumber, String LocationGroup)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><GetTotalInventoryRq>" +
-                "<PartNumber>" + PartNumber + "</PartNumber>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "</GetTotalInventoryRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "GetTotalInventoryRq");
+
+            if (PartNumber != null)
+                xml.Item1.WriteElementString("PartNumber", PartNumber);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request returns a list of your import options.
@@ -653,8 +661,9 @@ namespace RESTfulFish
          */
         public static String ImportListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ImportListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ImportListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request allows you to import data. 
@@ -667,16 +676,24 @@ namespace RESTfulFish
 		                    <Row>Data for each column required by the type</Row>
 	                    </Rows>
                    </ImportRq>
-        * TODO: Reimplement Row as a string array so that the web app do not have to 
-        * recall this request for each row, if there is more than one to be imported.
+        * TODO: Reimplement Row as a string array so that the web app does not have to 
+        * call this request for each row, if there is more than one row to be imported.
         */
         public static String ImportRq(String Key, String type, String HeaderRow, String Row)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ImportRq><Type>" + type + "</Type>" +
-                "<Rows><Row>" + HeaderRow + "</Row>" +
-                "<Row>" + Row + "</Row></Rows>" +
-                "</ImportRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ImportRq");
+
+            if (type != null)
+                xml.Item1.WriteElementString("Type", type);
+            if (HeaderRow != null && Row != null)
+            {
+                xml.Item1.WriteStartElement("Rows");
+                xml.Item1.WriteElementString("Row", HeaderRow);
+                xml.Item1.WriteElementString("Row", Row);
+                xml.Item1.WriteEndElement();
+            }
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request allows you to get the headers of an import. 
@@ -685,11 +702,14 @@ namespace RESTfulFish
 	                        <Type>ImportAddInventory</Type>
                    </ImportHeaderRq>
         */
-        public static String ImportHeaderRq(String Key)
+        public static String ImportHeaderRq(String Key, String Type)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ImportHeaderRq><Type>ImportAddInventory</Type>" +
-                "</ImportHeaderRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ImportHeaderRq");
+
+            if (Type != null)
+                xml.Item1.WriteElementString("Type", Type);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns details and quantity of a 
@@ -703,11 +723,16 @@ namespace RESTfulFish
         public static String InvQtyRq(String Key, String PartNum, String LastModifiedFrom, 
             String LastModifiedTo)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><InvQtyRq><PartNum>" + PartNum + "</PartNum>" +
-                "<LastModifiedFrom>" + LastModifiedFrom + "</LastModifiedFrom>" +
-                "<LastModifiedTo>" + LastModifiedTo + "</LastModifiedTo>" +
-                "</InvQtyRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "InvQtyRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (LastModifiedFrom != null)
+                xml.Item1.WriteElementString("LastModifiedFrom", LastModifiedFrom);
+            if (LastModifiedTo != null)
+                xml.Item1.WriteElementString("LastModifiedTo", LastModifiedTo);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Will issue a SalesOrder.
@@ -717,9 +742,12 @@ namespace RESTfulFish
         */
         public static String IssueSORq(String Key, String SONumber)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><IssueSORq><SONumber>" + SONumber + "</SONumber>" +
-                "</IssueSORq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "IssueSORq");
+
+            if (SONumber != null)
+                xml.Item1.WriteElementString("SONumber", SONumber);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a simple list of parts.
@@ -727,8 +755,9 @@ namespace RESTfulFish
          */
         public static String LightPartListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><LightPartListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "LightPartListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This will return information about the specified sales order.
@@ -738,9 +767,12 @@ namespace RESTfulFish
         */
         public static String LoadSORq(String Key, String Number)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><LoadSORq><Number>" + Number + "</Number>" +
-                "</LoadSORq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "LoadSORq");
+
+            if (Number != null)
+                xml.Item1.WriteElementString("Number", Number);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns a list of locations and their details.
@@ -748,8 +780,9 @@ namespace RESTfulFish
          */
         public static String LocationListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><LocationListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "LocationListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns information on a Location.
@@ -760,11 +793,14 @@ namespace RESTfulFish
         */
         public static String LocationQueryRq(String Key, String LocationID, String TagNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><LocationQueryRq>" +
-                "<LocationID>" + LocationID + "</LocationID>" +
-                "<TagNum>" + TagNum + "</TagNum>" +
-                "</LocationQueryRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "LocationQueryRq");
+
+            if (LocationID != null)
+                xml.Item1.WriteElementString("LocationID", LocationID);
+            if (TagNum != null)
+                xml.Item1.WriteElementString("TagNum", TagNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Logs a user in or out of Fishbowl.
@@ -785,14 +821,25 @@ namespace RESTfulFish
             MD5 md5 = MD5CryptoServiceProvider.Create();
             byte[] encoded = md5.ComputeHash(System.Text.Encoding.ASCII.GetBytes(UserPassword));
             string encryptedUserPassword = Convert.ToBase64String(encoded, 0, 16);
+            
+            // Cleanup
+            md5.Dispose();
+            encoded = null;
 
-            return "<FbiXml><Ticket/><FbiMsgsRq><LoginRq>" +
-                "<IAID>" + IAID + "</IAID>" +
-                "<IAName>" + IAName + "</IAName>" +
-                "<IADescription>" + IADescription + "</IADescription>" +
-                "<UserName>" + UserName + "</UserName>" +
-                "<UserPassword>" + encryptedUserPassword + "</UserPassword>" +
-                "</LoginRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(null, "LoginRq");
+
+            if (IAID != null)
+                xml.Item1.WriteElementString("IAID", IAID);
+            if (IADescription != null)
+                xml.Item1.WriteElementString("IADescription", IADescription);
+            if (UserName != null)
+                xml.Item1.WriteElementString("UserName", UserName);
+            if (IAName != null)
+                xml.Item1.WriteElementString("IAName", IAName);
+            if (UserPassword != null)
+                xml.Item1.WriteElementString("UserPassword", encryptedUserPassword);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Makes a payment on the specified order.
@@ -802,9 +849,12 @@ namespace RESTfulFish
         */
         public static String MakePaymentRq(String Key, String PaymentObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><MakePaymentRq><Payment>" + PaymentObj + "</Payment>" +
-                "</MakePaymentRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "MakePaymentRq");
+
+            if (PaymentObj != null)
+                xml.Item1.WriteElementString("Payment", PaymentObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Moves items from one specified location to another.
@@ -824,16 +874,30 @@ namespace RESTfulFish
         public static String MoveRq(String Key, String SourceLocationObj, String PartObj, 
             String Quantity, String Note, String TrackingObj, String DestinationLocationObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><MoveRq><SourceLocation><Location>" + SourceLocationObj + "</Location>" +
-                "</SourceLocation><Part>" + PartObj + "</Part>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<Note>" + Note + "</Note><" +
-                "Tracking>" + TrackingObj + "</Tracking>" +
-                "<DestinationLocation>" +
-                "<Location>" + DestinationLocationObj + "</Location>" +
-                "</DestinationLocation>" +
-                "</MoveRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "MoveRq");
+
+            if (SourceLocationObj != null)
+            {
+                xml.Item1.WriteStartElement("SourceLocation");
+                xml.Item1.WriteElementString("Location", SourceLocationObj);
+                xml.Item1.WriteEndElement();
+            }
+            if (PartObj != null)
+                xml.Item1.WriteElementString("Part", PartObj);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (Note != null)
+                xml.Item1.WriteElementString("Note", Note);
+            if (TrackingObj != null)
+                xml.Item1.WriteElementString("Tracking", TrackingObj); 
+            if (DestinationLocationObj != null)
+            {
+                xml.Item1.WriteStartElement("DestinationLocation");
+                    xml.Item1.WriteElementString("Location", DestinationLocationObj);
+                    xml.Item1.WriteEndElement();
+            }
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Use this request to obtain the average cost at which you've previously 
@@ -844,9 +908,12 @@ namespace RESTfulFish
         */
         public static String PartCostRq(String Key, String PartNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><PartCostRq><PartNum>" + PartNum + "</PartNum>" +
-                "</PartCostRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "PartCostRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns all the information pertaining to a specified Part at your default location.
@@ -857,10 +924,14 @@ namespace RESTfulFish
         */
         public static String PartGetRq(String Key, String Number, String GetImage)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><PartGetRq><Number>" + Number + "</Number>" +
-                "<GetImage>" + GetImage + "</GetImage>" +
-                "</PartGetRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "PartGetRq");
+
+            if (Number != null)
+                xml.Item1.WriteElementString("Number", Number);
+            if (GetImage != null)
+                xml.Item1.WriteElementString("GetImage", GetImage);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Like Part Get, Part Query Returns all the information pertaining to a specified Part. 
@@ -872,10 +943,14 @@ namespace RESTfulFish
         */
         public static String PartQueryRq(String Key, String PartNum, String LocationGroup)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><PartQueryRq><PartNum>" + PartNum + "</PartNum>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "</PartQueryRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "PartGetRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request will return all the picks that you specify. 
@@ -905,19 +980,33 @@ namespace RESTfulFish
             String Priority, String StartDate, String EndDate, 
             String Fulfillable, String LocationGroup)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><PickQueryRq><StartIndex>" + StartIndex + "</StartIndex>" +
-                "<RecordCount>" + RecordCount + "</RecordCount>" +
-                "<PickNum>" + PickNum + "</PickNum>" +
-                "<OrderNum>" + OrderNum + "</OrderNum>" +
-                "<PickType>" + PickType + "</PickType>" +
-                "<Status>" + Status + "</Status>" +
-                "<Priority>" + Priority + "</Priority>" +
-                "<StartDate>" + StartDate + "</StartDate>" +
-                "<EndDate>" + EndDate + "</EndDate>" +
-                "<Fulfillable>" + Fulfillable + "</Fulfillable>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "</PickQueryRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "PickQueryRq");
+
+            if (StartIndex != null)
+                xml.Item1.WriteElementString("StartIndex", StartIndex);
+            if (RecordCount != null)
+                xml.Item1.WriteElementString("RecordCount", RecordCount);
+            if (PickNum != null)
+                xml.Item1.WriteElementString("PickNum", PickNum);
+            if (OrderNum != null)
+                xml.Item1.WriteElementString("OrderNum", OrderNum);
+            if (PickType != null)
+                xml.Item1.WriteElementString("PickType", PickType);
+            if (Status != null)
+                xml.Item1.WriteElementString("Status", Status);
+            if (Priority != null)
+                xml.Item1.WriteElementString("Priority", Priority);
+            if (StartDate != null)
+                xml.Item1.WriteElementString("StartDate", StartDate);
+            if (EndDate != null)
+                xml.Item1.WriteElementString("EndDate", EndDate);
+            if (Fulfillable != null)
+                xml.Item1.WriteElementString("Fulfillable", Fulfillable);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Prints the default report for the specified module.
@@ -933,11 +1022,21 @@ namespace RESTfulFish
         */
         public static String PrintReportRq(String Key, String ModuleName, String Name, String Value)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><PrintReportRq><ModuleName>" + ModuleName + "</ModuleName>" +
-                "<ParameterList><ReportParam><Name>" + Name + "</Name>" +
-                "<Value>" + Value + "</Value>" +
-                "</ReportParam></ParameterList></PrintReportRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "PrintReportRq");
+
+            if (ModuleName != null)
+                xml.Item1.WriteElementString("ModuleName", ModuleName);
+            if (Name != null && Value != null)
+            {
+                xml.Item1.WriteStartElement("ParameterList");
+                xml.Item1.WriteStartElement("ReportParam");
+                xml.Item1.WriteElementString("Name", Name);
+                xml.Item1.WriteElementString("Value", Value);
+                xml.Item1.WriteEndElement();
+                xml.Item1.WriteEndElement();
+            }
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Requests detailed information about the product. 
@@ -951,10 +1050,14 @@ namespace RESTfulFish
         */
         public static String ProductGetRq(String Key, String Number, String GetImage)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ProductGetRq><Number>" + Number + "</Number>" +
-                "<GetImage>" + GetImage + "</GetImage>" +
-                "</ProductGetRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ProductGetRq");
+
+            if (Number != null)
+                xml.Item1.WriteElementString("Number", Number);
+            if (GetImage != null)
+                xml.Item1.WriteElementString("GetImage", GetImage);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Request the best price for a given product.
@@ -968,12 +1071,18 @@ namespace RESTfulFish
         public static String ProductPriceRq(String Key, String ProductNumber, String CustomerName, 
             String Quantity, String Date)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ProductPriceRq><ProductNumber>" + ProductNumber + "</ProductNumber>" +
-                "<CustomerName>" + CustomerName + "</CustomerName>" +
-                "<Quantity>" + Quantity + "</Quantity>" +
-                "<Date>" + Date + "</Date>" +
-                "</ProductPriceRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ProductPriceRq");
+
+            if (ProductNumber != null)
+                xml.Item1.WriteElementString("ProductNumber", ProductNumber);
+            if (CustomerName != null)
+                xml.Item1.WriteElementString("CustomerName", CustomerName);
+            if (Quantity != null)
+                xml.Item1.WriteElementString("Quantity", Quantity);
+            if (Date != null)
+                xml.Item1.WriteElementString("Date", Date);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Will do an automatic pick, pack, and ship on a 
@@ -993,13 +1102,20 @@ namespace RESTfulFish
         public static String QuickShipRq(String Key, String SONumber, String FulfillServiceItems, 
             String LocationGroup, String ErrorIfNotFulfilled, String ShipDate)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><QuickShipRq><SONumber>" + SONumber + "</SONumber>" +
-                "<FulfillServiceItems>" + FulfillServiceItems + "</FulfillServiceItems>" +
-                "<LocationGroup>" + LocationGroup + "</LocationGroup>" +
-                "<ErrorIfNotFulfilled>" + ErrorIfNotFulfilled + "</ErrorIfNotFulfilled>" +
-                "<ShipDate>" + ShipDate + "</ShipDate>" +
-                "</QuickShipRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "QuickShipRq");
+
+            if (SONumber != null)
+                xml.Item1.WriteElementString("SONumber", SONumber);
+            if (FulfillServiceItems != null)
+                xml.Item1.WriteElementString("FulfillServiceItems", FulfillServiceItems);
+            if (LocationGroup != null)
+                xml.Item1.WriteElementString("LocationGroup", LocationGroup);
+            if (ErrorIfNotFulfilled != null)
+                xml.Item1.WriteElementString("ErrorIfNotFulfilled", ErrorIfNotFulfilled);
+            if (ShipDate != null)
+                xml.Item1.WriteElementString("ShipDate", ShipDate);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Returns information about orders in the receiving module.
@@ -1034,27 +1150,46 @@ namespace RESTfulFish
             String DateReconciledEnd, String PartNum, String PartDesc, String LocationGroupID,
             String RMANum, String VendorName)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key>" +
-                "</Ticket><FbiMsgsRq><ReceivingListRq>" +
-                "<OrderNumber>" + OrderNumber + "</OrderNumber>" +
-                "<OrderType>" + OrderType + "</OrderType>" +
-                "<ReceiptStatus>" + ReceiptStatus + "</ReceiptStatus>" +
-                "<StartRecord>" + StartRecord + "</StartRecord>" +
-                "<RecordCount>" + RecordCount + "</RecordCount>" +
-                "<DateIssuedBegin>" + DateIssuedBegin + "</DateIssuedBegin>" +
-                "<DateIssuedEnd>" + DateIssuedEnd + "</DateIssuedEnd>" +
-                "<DateFulfilledBegin>" + DateFulfilledBegin + "</DateFulfilledBegin>" +
-                "<DateFulfilledEnd>" + DateFulfilledEnd + "</DateFulfilledEnd>" +
-                "<DateReceivedBegin>" + DateReceivedBegin + "</DateReceivedBegin>" +
-                "<DateReceivedEnd>" + DateReceivedEnd + "</DateReceivedEnd>" +
-                "<DateReconciledBegin>" + DateReconciledBegin + "</DateReconciledBegin>" +
-                "<DateReconciledEnd>" + DateReconciledEnd + "</DateReconciledEnd>" +
-                "<PartNum>" + PartNum + "</PartNum>" +
-                "<PartDesc>" + PartDesc + "</PartDesc>" +
-                "<LocationGroupID>" + LocationGroupID + "</LocationGroupID>" +
-                "<RMANum>" + RMANum + "</RMANum>" +
-                "<VendorName>" + VendorName + "</VendorName>" +
-                "</ReceivingListRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "ReceivingListRq");
+
+            if (OrderNumber != null)
+                xml.Item1.WriteElementString("OrderNumber", OrderNumber);
+            if (OrderType != null)
+                xml.Item1.WriteElementString("OrderType", OrderType);
+            if (ReceiptStatus != null)
+                xml.Item1.WriteElementString("ReceiptStatus", ReceiptStatus);
+            if (StartRecord != null)
+                xml.Item1.WriteElementString("StartRecord", StartRecord);
+            if (RecordCount != null)
+                xml.Item1.WriteElementString("RecordCount", RecordCount);
+            if (DateIssuedBegin != null)
+                xml.Item1.WriteElementString("DateIssuedBegin", DateIssuedBegin);
+            if (DateIssuedEnd != null)
+                xml.Item1.WriteElementString("DateIssuedEnd", DateIssuedEnd);
+            if (DateFulfilledBegin != null)
+                xml.Item1.WriteElementString("DateFulfilledBegin", DateFulfilledBegin);
+            if (DateFulfilledEnd != null)
+                xml.Item1.WriteElementString("DateFulfilledEnd", DateFulfilledEnd);
+            if (DateReceivedBegin != null)
+                xml.Item1.WriteElementString("DateReceivedBegin", DateReceivedBegin);
+            if (DateReceivedEnd != null)
+                xml.Item1.WriteElementString("DateReceivedEnd", DateReceivedEnd);
+            if (DateReconciledBegin != null)
+                xml.Item1.WriteElementString("DateReconciledBegin", DateReconciledBegin);
+            if (DateReconciledEnd != null)
+                xml.Item1.WriteElementString("DateReconciledEnd", DateReconciledEnd);
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (PartDesc != null)
+                xml.Item1.WriteElementString("PartDesc", PartDesc);
+            if (LocationGroupID != null)
+                xml.Item1.WriteElementString("LocationGroupID", LocationGroupID);
+            if (RMANum != null)
+                xml.Item1.WriteElementString("RMANum", RMANum);
+            if (VendorName != null)
+                xml.Item1.WriteElementString("VendorName", VendorName);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Saves and updates discounts
@@ -1064,9 +1199,12 @@ namespace RESTfulFish
         */
         public static String SaveDiscountRq(String Key, String DiscountObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveDiscountRq><Discount>" + DiscountObj + "</Discount>" +
-                "</SaveDiscountRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveDiscountRq");
+
+            if (DiscountObj != null)
+                xml.Item1.WriteElementString("Discount", DiscountObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Saves an image to the associated object.
@@ -1077,15 +1215,21 @@ namespace RESTfulFish
 	                        <UpdateAssociations>boolean</UpdateAssociations>
                    </SaveImageRq>
         */
-        public static String SaveImageRq(String Key, String type, String Number, 
+        public static String SaveImageRq(String Key, String Type, String Number, 
             String Image, String UpdateAssociations)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveImageRq><Type>" + type + "</Type>" +
-                "<Number>" + Number + "</Number>" +
-                "<Image>" + Image + "</Image>" +
-                "<UpdateAssociations>" + UpdateAssociations + "</UpdateAssociations>" +
-                "</SaveImageRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveImageRq");
+
+            if (Type != null)
+                xml.Item1.WriteElementString("Type", Type);
+            if (Number != null)
+                xml.Item1.WriteElementString("Number", Number);
+            if (Image != null)
+                xml.Item1.WriteElementString("Image", Image);
+            if (UpdateAssociations != null)
+                xml.Item1.WriteElementString("UpdateAssociations", UpdateAssociations);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request enables you to make changes to and fulfill picks.
@@ -1095,9 +1239,12 @@ namespace RESTfulFish
         */
         public static String SavePickRq(String Key, String PickObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SavePickRq><Pick>" + PickObj + "</Pick>" +
-                "</SavePickRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SavePickRq");
+
+            if (PickObj != null)
+                xml.Item1.WriteElementString("Pick", PickObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Updates receipt stored data.
@@ -1107,9 +1254,12 @@ namespace RESTfulFish
         */
         public static String SaveReceiptRq(String Key, String ReceiptObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveReceiptRq><Receipt>" + ReceiptObj + "</Receipt>" +
-                "</SaveReceiptRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveReceiptRq");
+
+            if (ReceiptObj != null)
+                xml.Item1.WriteElementString("Receipt", ReceiptObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Saves the report data. (Must restart client to view changes)
@@ -1120,10 +1270,14 @@ namespace RESTfulFish
         */
         public static String SaveReportRq(String Key, String ReportTree, String ReportObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveReportRq><ReportTree>" + ReportTree + "</ReportTree>" +
-                "<Report>" + ReportObj + "</Report>" +
-                "</SaveReportRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveReportRq");
+
+            if (ReportTree != null)
+                xml.Item1.WriteElementString("ReportTree", ReportTree);
+            if (ReportObj != null)
+                xml.Item1.WriteElementString("Report", ReportObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Saves the shipment data.
@@ -1133,9 +1287,12 @@ namespace RESTfulFish
         */
         public static String SaveShipmentRq(String Key, String ShippingObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveShipmentRq><Shipping>" + ShippingObj + "</Shipping>" +
-                "</SaveShipmentRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveShipmentRq");
+
+            if (ShippingObj != null)
+                xml.Item1.WriteElementString("Shipping", ShippingObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Request permits the change of a product UPC (Universal Product Code).
@@ -1147,11 +1304,16 @@ namespace RESTfulFish
          */
         public static String SaveUPCRq(String Key, String PartNum, String UPC, String UpdateProducts)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveUPCRq><PartNum>" + PartNum + "</PartNum>" +
-                "<UPC>" + UPC + "</UPC>" +
-                "<UpdateProducts>" + UpdateProducts + "</UpdateProducts>" +
-                "</SaveUPCRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveUPCRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (UPC != null)
+                xml.Item1.WriteElementString("UPC", UPC);
+            if (UpdateProducts != null)
+                xml.Item1.WriteElementString("UpdateProducts", UpdateProducts);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Enables you to change the default location of a part.
@@ -1164,10 +1326,14 @@ namespace RESTfulFish
         */
         public static String SetDefPartLocRq(String Key, String PartNum, String LocationObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SetDefPartLocRq><PartNum>" + PartNum + "</PartNum>" +
-                "<Location>" + LocationObj + "</Location>" +
-                "</SetDefPartLocRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SetDefPartLocRq");
+
+            if (PartNum != null)
+                xml.Item1.WriteElementString("PartNum", PartNum);
+            if (LocationObj != null)
+                xml.Item1.WriteElementString("Location", LocationObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Saves and updates tax rates.
@@ -1179,9 +1345,12 @@ namespace RESTfulFish
         */
         public static String SaveTaxRateRq(String Key, String TaxRateObj)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><SaveTaxRateRq><TaxRate>" + TaxRateObj + "</TaxRate>" +
-                "</SaveTaxRateRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SaveTaxRateRq");
+
+            if (TaxRateObj != null)
+                xml.Item1.WriteElementString("TaxRate", TaxRateObj);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Ships an order. Note Order Number must be written with an S in front.
@@ -1193,11 +1362,16 @@ namespace RESTfulFish
         */
         public static String ShipRq(String Key, String ShipNum, String ShipDate, String FulfillService)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><ShipRq><ShipNum>" + ShipNum + "</ShipNum>" +
-                "<ShipDate>" + ShipDate + "</ShipDate>" +
-                "<FulfillService>" + FulfillService + "</FulfillService>" +
-                "</ShipRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "SetDefPartLocRq");
+
+            if (ShipNum != null)
+                xml.Item1.WriteElementString("ShipNum", ShipNum);
+            if (ShipDate != null)
+                xml.Item1.WriteElementString("ShipDate", ShipDate);
+            if (FulfillService != null)
+                xml.Item1.WriteElementString("FulfillService", FulfillService);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Requests a list of UOMs.
@@ -1205,8 +1379,9 @@ namespace RESTfulFish
          */
         public static String UOMRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key>" +
-                "</Ticket><FbiMsgsRq><UOMRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "UOMRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Retrieves a vendor object. 
@@ -1217,9 +1392,12 @@ namespace RESTfulFish
          */
         public static String VendorGetRq(String Key, String Name)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><VendorGetRq><Name>" + Name + "</Name>" +
-                "</VendorGetRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "VendorGetRq");
+
+            if (Name != null)
+                xml.Item1.WriteElementString("Name", Name);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Requests a list of all vendors.
@@ -1227,8 +1405,9 @@ namespace RESTfulFish
         */
         public static String VendorListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key>" +
-                "</Ticket><FbiMsgsRq><VendorListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "VendorListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: Requests a list of all vendor names.
@@ -1236,8 +1415,9 @@ namespace RESTfulFish
         */
         public static String VendorNameListRq(String Key)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key>" +
-                "</Ticket><FbiMsgsRq><VendorNameListRq /></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "VendorNameListRq");
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request is used to void shipments 
@@ -1246,9 +1426,12 @@ namespace RESTfulFish
          */
         public static String VoidShipmentRq(String Key, String ShipNum)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><VoidShipmentRq><ShipNum>" + ShipNum + "</ShipNum>" +
-                "</VoidShipmentRq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "VoidShipmentRq");
+
+            if (ShipNum != null)
+                xml.Item1.WriteString(ShipNum);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
 
         /* Description: This request is used to void sales orders
@@ -1256,9 +1439,12 @@ namespace RESTfulFish
          */
         public static String VoidSORq(String Key, String SONumber)
         {
-            return "<FbiXml><Ticket><Key>" + Key + "</Key></Ticket>" +
-                "<FbiMsgsRq><VoidSORq><SONumber>" + SONumber + "</SONumber>" +
-                "</VoidSORq></FbiMsgsRq></FbiXml>";
+            Tuple<XmlWriter, StringWriter> xml = FishbowlLegacy.BeginWriteXml(Key, "VoidSORq");
+
+            if (SONumber != null)
+                xml.Item1.WriteString(SONumber);
+
+            return FishbowlLegacy.EndWriteXml(xml.Item1, xml.Item2);
         }
     }
 }

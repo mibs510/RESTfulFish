@@ -56,7 +56,7 @@ namespace RESTfulFish
         }
 
         /*
-         * Send the XML request string
+         * Send the JSON/XML request string
          */
         public static String sendCommand(string command)
         {
@@ -79,7 +79,7 @@ namespace RESTfulFish
             }
             catch (Exception e)
             {
-                return e.ToString();
+                return FishbowlLegacy.GenericXMLError(e.ToString());
             }
         }
 

@@ -385,6 +385,11 @@ namespace RESTfulFish
             int read = 0;
             while (count > 0)
             {
+                /* Fishbowl can take a very long time to respond. This can be observed in FishbowlLegacyRequests.GetSOListRq()
+                 * when no query paramters are passed and thus Fishbowl server queries all Sales Orders. We need to give Fishbowl
+                 * server a bit longer than 30 milliseconds to respond. 60000 milliseconds (1 minute) might 
+                 */
+                stream.ReadTimeout = 60000;
                 int block = stream.Read(buffer, index, count);
                 if (block == 0)
                 {
@@ -540,7 +545,11 @@ namespace RESTfulFish
         {
             CheckDisposed();
             int index = 0;
-            stream.ReadTimeout = 30;
+            /* Fishbowl can take a very long time to respond. This can be observed in FishbowlLegacyRequests.GetSOListRq()
+             * when no query paramters are passed and thus Fishbowl server queries all Sales Orders. We need to give Fishbowl
+             * server a bit longer than 30 milliseconds to respond. 60000 milliseconds (1 minute) might 
+             */
+            stream.ReadTimeout = 60000;
             while (index < size)
             {
                 int read = stream.Read(data, index, size - index);
