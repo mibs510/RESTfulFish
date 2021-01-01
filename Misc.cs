@@ -18,10 +18,18 @@ namespace RESTfulFish
 
 		public static Boolean UseHTTPS { get; set; }
 
-        public Misc()
+        public static void ExceptionMessage(String functionName, Exception exception, String Data, bool pause)
         {
-
-        }
+			Console.WriteLine("{0} {1}() Exception: {2}", DateTime.Now.ToString(), functionName, exception);
+			if (Data != null)
+				Console.WriteLine("{0} {1}() Data: {2}", DateTime.Now.ToString(), functionName, Data);
+			Console.WriteLine();
+			if (pause)
+            {
+				Console.WriteLine("Press ENTER to continue.");
+				Console.ReadLine();
+			}
+		}
 
 		/* Login using the appropiate request (FishbowlRequests or FishbowlLegacyRequest)
 		 */
@@ -158,33 +166,40 @@ namespace RESTfulFish
 
             while (true)
             {
-                PingReply reply = pingSender.Send(FishbowlServer, timeout, buffer, options);
-                if (reply.Status == IPStatus.DestinationHostUnreachable)
+                try
                 {
-					// Tell KeepAlive() and everyone else to stop sending data to Fishbowl since it's down.
-					FishbowlServerDown = true;
+					PingReply reply = pingSender.Send(FishbowlServer, timeout, buffer, options);
 
-					Console.WriteLine("Fishbowl server is down!");
-					Console.WriteLine("Checking if Fishbowl server is up in 5 seconds.");
-					Thread.Sleep(5000);
+					if (reply.Status == IPStatus.DestinationHostUnreachable)
+					{
+						// Tell KeepAlive() and everyone else to stop sending data to Fishbowl since it's down.
+						FishbowlServerDown = true;
 
-					// TODO: Verify that pinging a specific port signifies that an 
-					// application (Fishbowl) is listening on it and not just the OS responding.
-					while (!ConnectionObject.IsFishbowlPortOpen())
-                    {
-						Console.WriteLine("Fishbowl server is still down, chaecking again in 5 seconds.");
-						// Wait five seconds before checking again
+						Console.WriteLine("Fishbowl server is down!");
+						Console.WriteLine("Checking if Fishbowl server is up in 5 seconds.");
 						Thread.Sleep(5000);
-                    }
 
-					// TODO: Determine best option. Restart app or recall methods/functions?
-					// Restart app
-					System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
-					Environment.Exit(0);
+						// TODO: Verify that pinging a specific port signifies that an 
+						// application (Fishbowl) is listening on it and not just the OS responding.
+						while (!ConnectionObject.IsFishbowlPortOpen())
+						{
+							Console.WriteLine("Fishbowl server is still down, chaecking again in 5 seconds.");
+							// Wait five seconds before checking again
+							Thread.Sleep(5000);
+						}
+
+						// TODO: Determine best option. Restart app or recall methods/functions?
+						// Restart app
+						System.Diagnostics.Process.Start(Assembly.GetExecutingAssembly().Location);
+						Environment.Exit(0);
+					}
+					// Ping every 2 seconds
+					Thread.Sleep(2000);
+				}
+				catch(Exception e)
+                {
+					Misc.ExceptionMessage("WatchDog", e, null, false);
                 }
-				// Ping every 2 seconds
-				Thread.Sleep(2000);
-
             }
 
 			// Reconnect
@@ -200,23 +215,21 @@ namespace RESTfulFish
 		 */
 		public static void KeepAlive()
 		{
-			String statusCode = "";
-
-			Console.WriteLine("KeepAlive(): started");
+            Console.WriteLine("KeepAlive(): started");
 
 			while (!Misc.FishbowlServerDown)
 			{
 				// Wait KeepAliveSleep (from App.config) minutes.
 				Thread.Sleep(Misc.KeepAliveSleep);
-				Console.WriteLine("KeepAlive(): Sending...");
+				Console.WriteLine("{0} KeepAlive(): Sending...", DateTime.Now.ToString());
 				// Stop all requests via the REST HTTP interface until we are done getting a response back.
 				HoldAllFishbowlRequests = true;
 				// Wait one second before proceeding.
 				Thread.Sleep(1000);
-				statusCode = FishbowlLegacy.PullStatusCode(
+                string statusCode = FishbowlLegacy.PullStatusCode(
 					ConnectionObject.sendCommand(FishbowlLegacyRequests.CustomerNameListRq(Misc.Key)));
-				// Wait one second before allowing all other requests to be processed.
-				Thread.Sleep(1000);
+                // Wait one second before allowing all other requests to be processed.
+                Thread.Sleep(1000);
 				// Lift the hold.
 				HoldAllFishbowlRequests = false;
 

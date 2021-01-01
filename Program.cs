@@ -17,9 +17,9 @@ namespace RESTfulFish
 
             // RESTfulFish needs to be logged into Fishbowl server indefinitely, so start a second and third thread.
             // This needs to come after logging into Fishbowl.
-            // ThreadStart KeepAliveRef = new ThreadStart(Misc.KeepAlive);
-            // Thread KeepAliveThread = new Thread(KeepAliveRef);
-            // KeepAliveThread.Start();
+            ThreadStart KeepAliveRef = new ThreadStart(Misc.KeepAlive);
+            Thread KeepAliveThread = new Thread(KeepAliveRef);
+            KeepAliveThread.Start();
             ThreadStart WatchDogtRef = new ThreadStart(Misc.WatchDog);
             Thread WatchDogThread = new Thread(WatchDogtRef);
             WatchDogThread.Start();

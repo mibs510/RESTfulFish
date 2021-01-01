@@ -5,7 +5,6 @@ using Grapevine.Shared;
 using RESTfulFish;
 using System;
 using System.Configuration;
-using System.Threading;
 
 [RestResource]
 public class Grapes
@@ -25,11 +24,13 @@ public class Grapes
 
                 server.Port = ConfigurationManager.AppSettings.Get("HttpPort");
                 server.LogToConsole().Start();
-                Console.ReadLine();
-                server.Stop();
+                while (true)
+                {
+
+                }
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine("StartGrapevineServer(): {0}", e);
             Console.ReadLine();
@@ -43,32 +44,59 @@ public class Grapes
         var response = "";
         bool RespondInJson = false;
 
+        if (Misc.FishbowlServerDown)
+        {
+            response = FishbowlLegacy.GenericXMLError("Fishbowl server host is down!");
+            context.Response.StatusCode = HttpStatusCode.BadGateway;
+            goto sendResponse;
+        }
+
         if (context.Request.PathInfo != "/xml/")
         {
             if (context.Request.PathInfo == "/json/")
             {
                 RespondInJson = true;
-            } else if (context.Request.PathInfo != "/json/")
+            }
+            else if (context.Request.PathInfo != "/json/")
             {
                 response = FishbowlLegacy.GenericXMLError("Invalid path! Must be \"xml\" or \"json\".");
+                context.Response.StatusCode = HttpStatusCode.BadRequest;
+                goto sendResponse;
+            }
+        }
+
+        Console.WriteLine("context.Request.Payload:\n{0}", context.Request.Payload);
+        Console.WriteLine("context.Request.Payload.Length: {0}", context.Request.Payload.Length);
+
+        if (context.Request.Payload.Length != 0)
+        {
+            if (RespondInJson && !FishbowlLegacy.IsJson(context.Request.Payload))
+            {
+                response = FishbowlLegacy.GenericXMLError("Invalid body format! Object(s) must be in Json.");
+                context.Response.StatusCode = HttpStatusCode.BadRequest;
+                goto sendResponse;
+            }
+            else if (!RespondInJson && !FishbowlLegacy.IsXml(context.Request.Payload))
+            {
+                response = FishbowlLegacy.GenericXMLError("Invalid body format! Object(s) must be in XML.");
+                context.Response.StatusCode = HttpStatusCode.BadRequest;
+                goto sendResponse;
+            }
+
+            if (!FishbowlLegacy.ValidPayload(context.Request.Payload))
+            {
+                response = FishbowlLegacy.GenericXMLError("Invalid body format! Object(s) must be within <FishbowlLegacyObjects></FishbowlLegacyObjects> or {\"FishbowlLegacyObjects\":{}}.");
+                context.Response.StatusCode = HttpStatusCode.BadRequest;
                 goto sendResponse;
             }
         }
 
         response = FishbowlLegacy.GenericXMLError("Not a valid key!");
 
-        if (Misc.FishbowlServerDown)
-        {
-            response = FishbowlLegacy.GenericXMLError("Fishbowl server host is down!");
-            goto sendResponse;
-        }
-
         // Lets wait until KeepAlive() has received a statusCode.
         while (Misc.HoldAllFishbowlRequests)
         {
             Console.WriteLine("ConnectionObject.sendCommand(): Misc.HoldAllFishbowlRequests = {0}", Misc.HoldAllFishbowlRequests);
-            // Should we wait longer to check?
-            Thread.Sleep(1);
         }
 
         // Fishbowl Legacy Requests
@@ -83,9 +111,10 @@ public class Grapes
                 var UOMID = context.Request.QueryString["UOMID"];
                 var Cost = context.Request.QueryString["Cost"];
                 var Note = context.Request.QueryString["Note"];
-                var TrackingObj = context.Request.QueryString["TrackingObj"];
+                var TrackingObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Tracking");
                 var LocationTagNum = context.Request.QueryString["LocationTagNum"];
                 var TagNum = context.Request.QueryString["TagNum"];
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.AddInventoryRq(Misc.Key,
                     PartNum, Quantity, UOMID, Cost, Note, TrackingObj, LocationTagNum, TagNum));
             }
@@ -98,7 +127,7 @@ public class Grapes
                 var OrderNum = context.Request.QueryString["OrderNum"];
                 var CustomerNum = context.Request.QueryString["CustomerNum"];
                 var VendorNum = context.Request.QueryString["VendorNum"];
-                var MemoObj = context.Request.QueryString["MemoObj"];
+                var MemoObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Memo");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.AddMemoRq(Misc.Key,
                     ItemType, PartNum, ProductNum, OrderNum, CustomerNum, VendorNum, MemoObj));
             }
@@ -106,7 +135,7 @@ public class Grapes
             if (request == "AddSOItemRq")
             {
                 var OrderNum = context.Request.QueryString["OrderNum"];
-                var SalesOrderItemObj = context.Request.QueryString["SalesOrderItemObj"];
+                var SalesOrderItemObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "SalesOrderItem");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.AddSOItemRq(Misc.Key,
                     OrderNum, SalesOrderItemObj));
             }
@@ -135,7 +164,7 @@ public class Grapes
 
             if (request == "CalculateSORq")
             {
-                var SalesOrderObj = context.Request.QueryString["SalesOrderObj"];
+                var SalesOrderObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "SalesOrder");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.CalculateSORq(Misc.Key,
                     SalesOrderObj));
             }
@@ -189,6 +218,7 @@ public class Grapes
                 if (PartNum == null || Quantity == null)
                 {
                     response = FishbowlLegacy.GenericXMLError("Missing required element \"PartNum\", \"Quantity\", or \"LocationID\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -229,12 +259,14 @@ public class Grapes
                 if (Name != null && Query != null)
                 {
                     response = FishbowlLegacy.GenericXMLError("\"Name\" and \"Query\" element passed.");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
-                if(Name == null && Query == null)
+                if (Name == null && Query == null)
                 {
                     response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\" or \"Query\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -330,7 +362,7 @@ public class Grapes
                 var ProductDesc = context.Request.QueryString["ProductDesc"];
                 var ProductDetails = context.Request.QueryString["ProductDetails"];
                 var Salesman = context.Request.QueryString["Salesman"];
-                var type = context.Request.QueryString["type"];
+                var Type = context.Request.QueryString["Type"];
                 var DateIssuedBegin = context.Request.QueryString["DateIssuedBegin"];
                 var DateIssuedEnd = context.Request.QueryString["DateIssuedEnd"];
                 var DateCreatedBegin = context.Request.QueryString["DateCreatedBegin"];
@@ -343,12 +375,12 @@ public class Grapes
                 var DateCompletedEnd = context.Request.QueryString["DateCompletedEnd"];
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.GetSOListRq(Misc.Key,
                     SONum, LocationGroup, Status, CustomerPO, CustomerName, AccountNumber, BillTo,
-                    ShipTo, ProductNum, ProductDesc, ProductDetails, Salesman, type, DateIssuedBegin,
+                    ShipTo, ProductNum, ProductDesc, ProductDetails, Salesman, Type, DateIssuedBegin,
                     DateIssuedEnd, DateCreatedBegin, DateCreatedEnd, DateLasteModifiedBegin,
                     DateLasteModifiedEnd, DateScheduledBegin, DateScheduledEnd, DateCompletedBegin,
                     DateCompletedEnd));
             }
-            
+
             /* Works. Requires both PartNumber and LocationGroup
              * PartNumber: part number as entered in Fishbowl
              * LocationGroup: Demo, RMA, Site 1, Site 2, All
@@ -360,7 +392,8 @@ public class Grapes
 
                 if (PartNumber == null || LocationGroup == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"PartNumber\" and \"LocationGroup\"");
+                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"PartNumber\" and \"LocationGroup\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -375,24 +408,32 @@ public class Grapes
 
             if (request == "ImportRq")
             {
-                var type = context.Request.QueryString["type"];
-                var HeaderRow = context.Request.QueryString["HeaderRow"];
-                var Row = context.Request.QueryString["Row"];
+                var Type = context.Request.QueryString["Type"];
+                var Rows = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Rows");
+
+                if (Type == null || Rows == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"Type\" and/or \"Rows\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ImportRq(Misc.Key,
-                    type, HeaderRow, Row));
+                    Type, Rows));
             }
 
             if (request == "ImportHeaderRq")
             {
-                var type = context.Request.QueryString["type"];
+                var Type = context.Request.QueryString["Type"];
 
-                if (type == null)
+                if (Type == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"type\".");
+                    response = FishbowlLegacy.GenericXMLError("Missing required elements \"Type\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
-                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ImportHeaderRq(Misc.Key, type));
+                response = ConnectionObject.sendCommand(FishbowlLegacyRequests.ImportHeaderRq(Misc.Key, Type));
             }
 
             // Works. Requires PartNum.
@@ -404,7 +445,8 @@ public class Grapes
 
                 if (PartNum == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required element \"PartNum\"");
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"PartNum\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -431,7 +473,8 @@ public class Grapes
 
                 if (Number == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\"");
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -455,18 +498,18 @@ public class Grapes
 
             if (request == "MakePaymentRq")
             {
-                var PaymentObj = context.Request.QueryString["PaymentObj"];
+                var PaymentObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Payment");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.MakePaymentRq(Misc.Key, PaymentObj));
             }
 
             if (request == "MoveRq")
             {
-                var SourceLocationObj = context.Request.QueryString["SourceLocationObj"];
-                var PartObj = context.Request.QueryString["PartObj"];
+                var SourceLocationObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "SourceLocation");
+                var PartObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Part"); ;
                 var Quantity = context.Request.QueryString["Quantity"];
                 var Note = context.Request.QueryString["Note"];
-                var TrackingObj = context.Request.QueryString["TrackingObj"];
-                var DestinationLocationObj = context.Request.QueryString["DestinationLocationObj"];
+                var TrackingObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Tracking");
+                var DestinationLocationObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "DestinationLocation");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.MoveRq(Misc.Key,
                     SourceLocationObj, PartObj, Quantity, Note, TrackingObj, DestinationLocationObj));
             }
@@ -526,7 +569,8 @@ public class Grapes
 
                 if (Number == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\"");
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Number\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -585,43 +629,49 @@ public class Grapes
 
             if (request == "SaveDiscountRq")
             {
-                var DiscountObj = context.Request.QueryString["DiscountObj"];
+                var DiscountObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Discount"); ;
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveDiscountRq(Misc.Key, DiscountObj));
             }
 
             if (request == "SaveImageRq")
             {
-                var type = context.Request.QueryString["type"];
+                var Type = context.Request.QueryString["Type"];
                 var Number = context.Request.QueryString["Number"];
                 var Image = context.Request.QueryString["Image"];
                 var UpdateAssociations = context.Request.QueryString["UpdateAssociations"];
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveImageRq(Misc.Key,
-                    type, Number, Image, UpdateAssociations));
+                    Type, Number, Image, UpdateAssociations));
             }
 
             if (request == "SavePickRq")
             {
-                var PickObj = context.Request.QueryString["PickObj"];
+                var PickObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Pick");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SavePickRq(Misc.Key, PickObj));
             }
 
             if (request == "SaveReceiptRq")
             {
-                var ReceiptObj = context.Request.QueryString["ReceiptObj"];
+                var ReceiptObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Receipt");
+                if (ReceiptObj == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required object \"Receipt\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
+                    goto sendResponse;
+                }
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveReceiptRq(Misc.Key, ReceiptObj));
             }
 
             if (request == "SaveReportRq")
             {
                 var ReportTree = context.Request.QueryString["ReportTree"];
-                var ReportObj = context.Request.QueryString["ReportObj"];
+                var ReportObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Report");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveReportRq(Misc.Key,
                     ReportTree, ReportObj));
             }
 
             if (request == "SaveShipmentRq")
             {
-                var ShippingObj = context.Request.QueryString["ShippingObj"];
+                var ShippingObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Shipping");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveShipmentRq(Misc.Key, ShippingObj));
             }
 
@@ -637,14 +687,20 @@ public class Grapes
             if (request == "SetDefPartLocRq")
             {
                 var PartNum = context.Request.QueryString["PartNum"];
-                var LocationObj = context.Request.QueryString["LocationObj"];
+                var LocationObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "Location");
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SetDefPartLocRq(Misc.Key,
                     PartNum, LocationObj));
             }
 
             if (request == "SaveTaxRateRq")
             {
-                var TaxRateObj = context.Request.QueryString["TaxRateObj"];
+                var TaxRateObj = FishbowlLegacy.ExtractFishbowlObject(context.Request.Payload, "TaxRate");
+                if (TaxRateObj == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required object \"TaxRate\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
+                    goto sendResponse;
+                }
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.SaveTaxRateRq(Misc.Key, TaxRateObj));
             }
 
@@ -668,7 +724,8 @@ public class Grapes
 
                 if (Name == null)
                 {
-                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\"");
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"Name\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
                     goto sendResponse;
                 }
 
@@ -690,12 +747,28 @@ public class Grapes
             if (request == "VoidShipmentRq")
             {
                 var ShipNum = context.Request.QueryString["ShipNum"];
+
+                if (ShipNum == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"ShipNum\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.VoidShipmentRq(Misc.Key, ShipNum));
             }
 
             if (request == "VoidSORq")
             {
                 var SONumber = context.Request.QueryString["SONumber"];
+
+                if (SONumber == null)
+                {
+                    response = FishbowlLegacy.GenericXMLError("Missing required element \"SONumber\".");
+                    context.Response.StatusCode = HttpStatusCode.BadRequest;
+                    goto sendResponse;
+                }
+
                 response = ConnectionObject.sendCommand(FishbowlLegacyRequests.VoidSORq(Misc.Key, SONumber));
             }
         }
